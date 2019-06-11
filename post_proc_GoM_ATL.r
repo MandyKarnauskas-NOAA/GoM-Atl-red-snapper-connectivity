@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 rm(list=ls())
 
 # setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/initial_run")

@@ -1,0 +1,15 @@
+11June2019
+- cleaned up file names, organized in MASTER_codes folder and cleaned up codes
+  ** changed code for assigning depth of spawning -- now specific to hydrodynamic nest to avoid (-1) exit code error
+  ** release files now have nest descriptor in filename (e.g., RS_ATL_releaseHatteras_HYCOM150.txt)
+
+New files: 
+	nest_1_20080501000000_HYCOM150.nc	HYCOM 1/50 degree nest for depth extract
+	RS_ATL_release_HYCOM150.txt		updated release file for entire Atlantic based on egg production map, using HYCOM 1/50 nest
+	RS_ATL_releaseHatteras_HYCOM150.txt	updated release file for Hatteras hotspot based on egg production map, using HYCOM 1/50 nest
+	RS_ATL_releaseMain_HYCOM150.txt		updated release file for Atlantic S of 34N based on egg production map, using HYCOM 1/50 nest
+	RS_CMS_releasefile_ATL.r		release file building off Atlantic statistical egg production map
+	RS_CMS_releasefile_GoM.r		release file building of MCF paper SSB distribution 
+	RS_CMS_releasefile_Tortugas.r		release file building off SEAMAP reef fish video survey sent by Matt Campbell on Mon, Mar 11, 12:57 PM
+
+
