@@ -4,10 +4,11 @@ rm(list=ls())
 # setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn")
 # setwd("C://Users/mkarnauskas/Desktop/compOcMod/GoM_run_SABGOM")
 # setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/Oct26run_newmap")
+#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
 
-setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
-                                                                             
-##############  concatenate files  ###################
+setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/runGulf_HYCOM150")                                                                             
+
+##############  concatenate files  ###################                                   
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
 files <- cbind(filelist, NA)
 files[,2] <- substr(files[,1], 10, 11)
@@ -27,7 +28,7 @@ dat$rel_reg[which(dat$rel_poly > 76)] <- "ATL"
 
 ###########################  specify release file  #############################
 #d <- read.table("C://Users/mkarnauskas/Desktop/RSmap_SA/RS_ATL_releaseOct25.txt")
-d <- read.table("C://Users/mkarnauskas/Desktop/RSmap_SA/RS_ATL_releaseS.txt")
+d <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/fullGoM_release_HYCOM150.txt")
 
 d$reg <- "GOM"
 d$reg[which(d$V1 > 76)] <- "ATL"
@@ -78,11 +79,6 @@ legend("topleft", paste("P = ",  round(anova(out)$P[1],3), ", R^2 = ", round(sum
 
 rm(list=ls())
 
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/initial_run2")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn_lores_byyear")
-setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
-
 library(ncdf4)
 library(maps)
 
@@ -101,7 +97,7 @@ cols <- rainbow(100, start=0.55, end=0.62)[100:1]
 cols[100] <- "white"
 
 ###############  plots by year  
-yrs <- 2004:2010
+yrs <- 2009
 par(mfrow=c(2,4), mex=0.6)
 
 maxlat <- rep(NA, 7)
@@ -121,8 +117,7 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   dep <- ncvar_get(nc, v4)
   dep[which(dep>10000)] <- NA
   v6 <- nc$var[[6]]
-  cod <- ncvar_get(nc, v6)
-  cod[which(cod>10000)] <- NA    # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
+  cod <- ncvar_get(nc, v6)  # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
 nc_close(nc)
 
 #  i <- which(cod == (-4))
@@ -134,7 +129,7 @@ nc_close(nc)
 map('usa', xlim=c(-85.5, -75), ylim=c(23.85,35), col=0)
 image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
 legend("topleft", paste(yrs[m]), cex=1.2, text.font=2, bty="n")
-  i <- 1:length(cod)   #which(cod == (-4))
+  i <- which(cod == (-4))
   k <- i[seq(1, length(i), length.out=numlarv*2)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") } 
   
@@ -147,7 +142,8 @@ legend("topleft", paste(yrs[m]), cex=1.2, text.font=2, bty="n")
           points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
           if (lon[1,j]-360 < (-81.7))  {  points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  else { 
           points(lo, la, col="#FF000050", pch=19, cex=1)  }
-         }      }
+         }      
+         }
 #  i <- which(cod == (-4))    
 #    for (j in i) {
 #      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
@@ -213,12 +209,13 @@ legend("topleft", c("all trajectories", "trajectories of successful recruits", "
 
 
  ### all trajectories on one map  -- full GoM   
-par(mar=c(4,6,1,1))
-map('usa', xlim=c(-98, -76), ylim=c(23.85,35), col=0, xlab="longitude", ylab="latitude")
+par(mar=c(7,7,1,1))
+map('usa', xlim=c(-98, -76), ylim=c(23.84,35), col=0, xlab="longitude", ylab="latitude")
 image(x,y,z, col=cols, axes=T, add=T, xlab="longitude", ylab="latitude"); box(); axis(1); axis(2, las=2)
 mtext(side=1, line=2, "longitude"); mtext(side=2, line=2.5, "latitude")
+mtext(side=3, line=1, "HYCOM 1/50 degree model -- 2009")
 
-for (m in 7:1) {
+for (m in 2:2) {
   nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
@@ -235,40 +232,22 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   cod[which(cod>10000)] <- NA    # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
 nc_close(nc)
 
-  i <- 1:length(cod)   #which(cod == (-4))
-  k <- i[seq(1, length(i), length.out=2000)]
-  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") }  }
+  i <- 1:length(cod)   #  which(cod == (-4))        # 
+  k <- i[seq(1, length(i), length.out=4000)]
+  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") } 
   
-for (m in 7:1) {
-  nam <- paste("traj_file_", m, ".nc", sep="")
-nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
-  v2 <- nc$var[[2]]
-  lon <- ncvar_get(nc, v2)
-  lon[which(lon>10000)] <- NA
-  v3 <- nc$var[[3]]
-  lat <- ncvar_get(nc, v3)
-  lat[which(lat>10000)] <- NA
-  v4 <- nc$var[[4]]
-  dep <- ncvar_get(nc, v4)
-  dep[which(dep>10000)] <- NA
-  v6 <- nc$var[[6]]
-  cod <- ncvar_get(nc, v6)
-  cod[which(cod>10000)] <- NA    # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
-nc_close(nc)
-  
-  i <- which(cod == (-4)) 
-    for (j in i) {
-      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
+  for (j in which(cod == (-4))  ) {
+      lo <- lon[max(which(!is.na(lon[,j]))),j] - 360
+      la <- lat[max(which(!is.na(lat[,j]))),j]
     if (lo > (-81.7))  {  
           lines(lon[,j]-360, lat[,j], col="#00000010")
-          points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)   
+          points(lon[1,j]-360, lat[1,j], col="#00FF0050", pch=19, cex=1)   
           points(lo, la, col="#FF000050", pch=19, cex=1) 
              } }
     }
     
 legend("topleft", c("all larval trajectories", "trajectories of larvae successfully recruiting to Atlantic", "source locations of larvae recruiting to Atlantic", "settlement locations of larvae released from Gulf"), 
- lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, 1, 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.2, bty="n")  
+ lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, "green", 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.2, bty="n")  
 
 
 

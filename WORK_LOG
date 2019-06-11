@@ -13,3 +13,24 @@ New files:
 	RS_CMS_releasefile_Tortugas.r		release file building off SEAMAP reef fish video survey sent by Matt Campbell on Mon, Mar 11, 12:57 PM
 
 
+new folder: runGulf_HYCOM150
+	this is the first Gulf-wide run with HYCOM 1/50 deg model (years 2008 and 2009)
+    model attributes:
+        nnests: 1
+        timeMax: 2592000
+        timeStep: 2700
+        releaseFilename: fullGoM_release_HYCOM150.txt
+        turb: .true.
+        horDiff: 20
+        vertDiff: 0.00100000004749745
+        turbTimestep: 2700
+        avoidcoast: .true.
+        polygon: .true.
+        polyFilename: redSnapperSett_GOM_ATL.xyz
+        settlementStart: 26
+        ibio: .true.
+        ibioFilename: vert_matrix_red_sd0
+        ibioTimestep: 2700
+        massSpawning: .true.
+        larvaStart: 1
+
