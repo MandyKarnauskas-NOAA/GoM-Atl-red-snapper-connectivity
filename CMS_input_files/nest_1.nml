@@ -1,0 +1,37 @@
+&nest_input
+filename="http://tds.hycom.org/thredds/dodsC/GLBa0.08/expt_90.8"
+xaxis= "Latitude"
+yaxis= "Longitude"
+zaxis= "Depth"
+taxis= "Time"
+xstart=-98
+xend=-20
+ystart=-4.953816
+yend=44.98657
+zstart=0
+zend=100.00
+zaxis_positive_direction= "down"
+tstart_yy=2008
+tstart_mm=5
+tstart_dd=1
+tend_yy=2009
+tend_mm=10
+tend_dd=31
+time_step=86400
+time_units="hours" 
+jdate_yy=1900
+jdate_mm=12
+jdate_dd=31
+lon_name= "Longitude"
+lat_name= "Latitude"
+depth_name= "Depth"
+depth_conversion_factor=1
+time_name= "Time"
+uvel_name= "u"
+vvel_name= "v"
+wvel_positive_direction="upward"
+velocity_conversion_factor = 1
+temp_name= "temperature"
+saln_name= "salinity"
+fill_value=1.2676506E30
+$end
