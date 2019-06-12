@@ -1,3 +1,12 @@
+12June2019
+ran ATL simulations and put in new folder: runGulf_HYCOM150
+* note - error with 2009 in GoM runs 0 - throwing -5 exit code for some dates (missing oc data -why??) 
+* only 2008 run with Atlantic
+
+added some additional checks to post_proc_GoM_Atl code - screening traj_files for random errors
+
+
+
 11June2019
 - cleaned up file names, organized in MASTER_codes folder and cleaned up codes
   ** changed code for assigning depth of spawning -- now specific to hydrodynamic nest to avoid (-1) exit code error
