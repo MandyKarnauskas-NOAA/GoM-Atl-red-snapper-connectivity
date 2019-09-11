@@ -112,7 +112,7 @@ for (i in 2:length(latcuts))   {
   pct <- pct + 1
   pols <- rbind(pols, p)  }
 
-####  polygon 88 - 107 -- corner pieces                                     89 99ur 108 rem 109  117
+####  polygon 88 - 107 -- corner pieces                                     
   a <- which.max(sh[,1] < (-78))
   b <- which.min(dp[,1] < (-78))
   a1 <- which.max(sh[,2] < latcuts[i])
