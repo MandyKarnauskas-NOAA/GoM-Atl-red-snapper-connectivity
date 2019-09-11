@@ -1,3 +1,6 @@
+9Sept2019
+Dug up old settlement polygon file, refined polygons in Atl to match resolution in Gulf
+
 12June2019
 ran ATL simulations and put in new folder: runGulf_HYCOM150
 * note - error with 2009 in GoM runs 0 - throwing -5 exit code for some dates (missing oc data -why??) 
