@@ -1,3 +1,14 @@
+12 Sept 2019
+Cleaned up release files for 3 different regions
+
+PENDING ISSUES THAT NEED TO BE FIXED: 
+Selected dates are off peak spawning seasons --> need to extract all dates and subset by threshold spawning activity
+Need to align dates across GoM-Atl to facilitate post-processing --> every 6 days, but on same days
+Forgot to incorporate total area in the ratio calculation.  CPUE should be scaled on a per-area basis, not total across region. 
+
+Started work to modify date extraction on Tortugas release file code; adopt for other regions when complete and tested.  
+
+
 9Sept2019
 Dug up old settlement polygon file, refined polygons in Atl to match resolution in Gulf
 
