@@ -41,7 +41,7 @@ lnorm.se   <- function(x1, x1e) {  ((exp(x1e^2)-1)*exp(2 * x1 + x1e^2))^0.5  }
 ################################################################################
 
 ################   make predictions for release file by doy   ##################
-    
+   
 plot(d$doy, d$temp)
 g <- gam(temp ~ s(doy), data=d)
 summary(g)
@@ -72,6 +72,7 @@ for (i in seq(min(d$doy), max(d$doy), 6/365))  {      ########  NOTE!!!!   #####
 nrow(tempmat) * length(seq(min(d$doy), max(d$doy), 6/365))
 dim(preddoy)
 
+windows()
 par(mfrow=c(1,2))
 plotSAmap(tempmat$predind/1000, tempmat$lon, tempmat$lat, cexnum=0.6, pchnum=15)
 plotSAmap(predlogit$fit*10, tempmat$lon, tempmat$lat, cexnum=0.6, pchnum=15)
@@ -79,6 +80,7 @@ plotSAmap(predlogit$fit*10, tempmat$lon, tempmat$lat, cexnum=0.6, pchnum=15)
 dat <- data.frame(cbind(as.numeric(preddoy$lon), as.numeric(preddoy$lat), as.numeric(preddoy$predind), as.numeric(preddoy$doy)))
 names(dat) <- c("lon", "lat", "N", "doy")
 
+windows()
 par(mfrow=c(3,5), mex=0.5)
 for (i in unique(dat$doy)[1:15]) {
 f <- dat[which(dat$doy==i),]
@@ -87,11 +89,12 @@ mtext(side=3, line=0.5, paste("day of year", round(i*365))) }
 
 ##########################  assign polygon labels  #############################
 
-co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL.xyz", header=F)                    # edited version to align with state boundaries
-
+co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
+         
 ################################################################################
 
 ################  plot original recruitment habitat grid cells  ################
+windows()
 plot(1, xlim=c(-100,-75), ylim=c(24,36))
 for (j in unique(co[,3]))  {
   m <- co[which(co[,3]==j),]; polygon(m, col=j)
@@ -146,11 +149,11 @@ points(rel$lon, rel$lat, pch=19, cex=0.5, col=rel$polynams)          #  check
 ###  !!!! NOTE !!!! 
 ###  Important to use nest from simulation to be run to avoid particles being trapped below surface 
 #
-nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    
-#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # open netcdf and get temp variable
+#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    # HYCOM model 1/12 deg for 2008-2009
+#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # SABGOM Gulf nest
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/Hatteras_issue/CMS_inputs_outputs/nest2AtlSABGOM.nc")
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/Hatteras_issue/CMS_inputs_outputs/nest_smallHatteras.nc")
-#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_2_20070701000000.nc")          # open netcdf and get temp variable
+nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_2_20070701000000.nc")          # SABGOM Atl nest
 
 
 v1 <- nc$var[[1]]
@@ -165,7 +168,7 @@ lat <- nc$var[[1]]$dim[[2]]$vals
 dep <- nc$var[[1]]$dim[[3]]$vals
 cur <- sqrt(u^2 + v^2)
 
-image(lon, lat, cur[,,1])
+image(lon, lat, cur[,,1], add=T)
 image(lon, lat, cur[,,1], xlim=c(-85, -75), ylim=c(24,31))
 
 rel$depest <- NA
@@ -193,7 +196,7 @@ minspawndep <- 9                                  #  minimum spawning depth set 
 
 length(which(rel$depest<minspawndep))
 dim(rel)
-tapply(rel$N, rel$depest<minspawndep, sum)         # relative spawning biomass above 15m cutoff
+tapply(rel$N, rel$depest<minspawndep, sum)         # relative spawning biomass above cutoff
 rel <- rel[which(rel$depest>=minspawndep),]
 dim(rel)
 
@@ -209,19 +212,21 @@ plotSAmap(rel$spawndep, rel$lon, rel$lat, 15, 0.6)      # check on map
 rel$mon <- as.numeric(format(strptime(rel$doy*365, format="%j"), format="%m"))
 rel$day <- as.numeric(format(strptime(rel$doy*365, format="%j"), format="%d"))
 
-lis <- 2008:2009               # loop over years in matrix below
+lis <- 2004:2010               # loop over years in matrix below  2008-2009 for 1/12 deg HYCOM; 2004-2010 for SABGOM
 
 ##############  trim release file to cells with sufficient eggs   ##############
 
 m <- rel[-c(5,6)]       # 'm' is list of release sites with columns: polygon, lon, lat, number of releases
 head(m)
 
-x <- m$N /20000
+x <- m$N / 100
+x1 <- round(x)
+tapply(x, (x1 == 0), sum)/sum(x)          # what percentage of particles get lost by rounding?
+mean(x1); min(x1); max(x1)
 
-m$N <-round(m$N / 20000)
+m$N <-round(m$N / 100)
 mean(m$N); min(m$N); max(m$N)
 table(m$N==0)
-tapply(x, (m$N == 0), sum)/sum(x)          # what percentage of particles get lost by rounding?
 
 m <- m[which(m$N>0),]
 
@@ -253,13 +258,15 @@ dim(mat)/8
 dim(mat)/7
 sum(mat$V5)
 
-write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+#write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 
 matN <- mat[which(mat$V3 > 34),]
 matS <- mat[which(mat$V3 <= 34),]
 
-write.table(matN, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
-write.table(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseMain_HYCOM150.txt", sep="\t", col.names=F, row.names=F)  
+save(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling_SABGOM.RData")          # WRITE FILE TO TXT
+
+#write.table(matN, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+#write.table(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseMain_HYCOM150.txt", sep="\t", col.names=F, row.names=F)  
 
 #  break down by year, then above and below 34N
 #  >34N run thru global HYCOM
@@ -296,10 +303,10 @@ diff(table(matfin$V6))
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
 
-f <- which(matfin$V6==2008 & matfin$V7 == 5 & matfin$V8 == 6); length(f)
+f <- which(matfin$V6==2008 & matfin$V7 == 2 & matfin$V8 == 23); length(f)       # off peak spawning 
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
-f <- which(matfin$V6==2010 & matfin$V7 == 05 & matfin$V8 == 24); length(f)
+f <- which(matfin$V6==2008 & matfin$V7 == 05 & matfin$V8 == 24); length(f)      # peak spawning
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
 ##################################   END    ####################################

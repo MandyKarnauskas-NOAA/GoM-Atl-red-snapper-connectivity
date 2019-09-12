@@ -1,6 +1,16 @@
+################################################################################
+###########################   red snapper release file for CMS  ################
+###########################   M. Karnauskas Sep 12 2019         ################
+#
+#  take locations from databases where RS have been observed in Keys/Tortugas
+#  merge with spawning seasonality from GoM
+################################################################################
 
 rm(list=ls())
-d <- read.table("C://Users/mkarnauskas/Desktop/rfvm_sm_sta.csv", sep=",", header=T)
+library(maps)
+
+###########    import video data from Matt Campbell 
+d <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/rfvm_sm_sta.csv", sep=",", header=T)
 
 source("C:/Users/mkarnauskas/Desktop/completed_manuscripts/RS_mapping_paper/plotting.r")
 
@@ -13,19 +23,19 @@ plot(d1$sta_lon, d1$sta_lat)
 map('usa', ylim=c(22, 31), xlim=c(-86,-80), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
 points(d1$sta_lon, d1$sta_lat)
 points(d1$end_lon, d1$end_lat, col=2)
-abline(h=24.95821)
+abline(h=24.95821)                     # cutoff of GoM map
 
 d2 <- d1[which(d1$sta_lat < 24.958),]
 
 dat <- data.frame(cbind(d2$sta_lon, d2$sta_lat, 10))
 names(dat) <- c("lon", "lat", "N")
-dat
+dat                                    # only 4 locations observed outside of survey area
 
-#################################
-co <- read.table("C://Users/mkarnauskas/Desktop/red_snapper/Mar2016/redSnapperSett_GOM_ATL.txt", sep="\t", header=F)
+#########################   import polygon file    #############################
+co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
 
 ################  plot original recruitment habitat grid cells  ################
-plot(1, xlim=c(-98,-81), ylim=c(24,31))
+plot(1, xlim=c(-98,-76), ylim=c(24,35))
 for (j in unique(co[,3]))  {
   m <- co[which(co[,3]==j),]; polygon(m, col=j)
   text(m[1,1], m[1,2], m[1,3], cex=0.6)      }
@@ -40,7 +50,9 @@ rel
 ###############################     ADD DEPTH      ##################################################
 
 library(ncdf4)
-nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/Hatteras_issue/Matthieu_HYCOM20082009/nest_1_20080501000000.nc")          # open netcdf and get temp variable
+#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    
+nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # this is SABGOM nest_1
+
 v1 <- nc$var[[1]]
 u <- ncvar_get(nc, v1)
 dim(u)
@@ -52,7 +64,7 @@ lon <- nc$var[[1]]$dim[[1]]$vals - 360
 lat <- nc$var[[1]]$dim[[2]]$vals
 dep <- nc$var[[1]]$dim[[3]]$vals
 cur <- sqrt(u^2 + v^2)
-image(lon, lat, cur[,,1])
+image(lon, lat, cur[,,1], add=T)
 
 #d <- matrix(NA, 976, 694)
 #for (i in 1:341) {
@@ -81,22 +93,20 @@ rel
 ###################  MAKE RELEASE FILE  #####################################
 ######################### input temporal information ###########################
 
-days <- read.table("C:/Users/mkarnauskas/Desktop/red_snapper/Jan2015/RELEASEFILE_INDEXnew.csv", sep=",", header=T)     # this inputs a file which references lunar phases and peak spawning times with all dates from 2004 - 2008
-#days$red_snapper[which(days$mo==4)] <- 1
-sp <- which(days$red_snapper==1 & days$yr==2008)
-sp <- sp[seq(1, length(sp)-1, 6)]
-#sp <- sp[seq(1, length(sp)-1, 3)]
-lis <- days[sp, 1:3]
-dim(lis)
-lis <- lis[-1,]
-lis <- lis[which(lis$mo<9),]
+days <- as.Date(format("2010-01-01"))+0:364
+lis <- data.frame(substr(days, 1, 4))
+lis$ <- data.frame(substr(days, 1, 4))
+(yr, mon, da, doy, spawnact)
+
+sp <- days[seq(1, length(days), 6)]
+doy <- seq(1, length(days), 6)/365
 
 table(lis$yr)
 table(lis$yr, lis$mo)
 dim(lis)
 lis2 <- lis
 
-for (i in 2009) {
+for (i in 2005:2010) {
    lis2$yr <- i
    lis <- rbind(lis, lis2) }
 
@@ -167,7 +177,7 @@ getwd()
 dim(matfin)
 dim(matfin)/8
 
-write.table(matfin, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/TortugasRel_RS.txt", sep="\t", col.names=F, row.names=F)
+save(matfin, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/KEYSreleaseForScaling_SABGOM.RData")
 
 # double check
 table(matfin$V6, matfin$V7)
@@ -177,5 +187,4 @@ diff(table(matfin$V6))
 
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
-
 

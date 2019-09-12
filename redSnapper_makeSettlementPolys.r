@@ -178,12 +178,12 @@ c0 <- contourLines(x,y,z, levels=c(0))
 for (i in 1:1) {  lines(c0[[i]]$x, c0[[i]]$y)  }
 
 windows()
-for (i in 106:125)  {
+for (i in 76:117)  {
   f <- pols[which(pols$id==i),]
   plot(f$V1, f$V2, col=0)
   polygon(f)
   text(mean(f$V1), mean(f$V2), i)
-  Sys.sleep(2) }
+  Sys.sleep(1.5) }
 
 
 ############  concatenate with Gulf   ###########                  
@@ -191,13 +191,13 @@ for (i in 106:125)  {
 names(pols) <- names(d)
 pols <- rbind(d, pols)
 
-write.table(pols, file="redSnapperSett_GOM_ATL_hires.txt", sep="\t", col.names=F, row.names=F)
+write.table(pols, file="C://Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/redSnapperSett_GOM_ATL_hires.txt", sep="\t", col.names=F, row.names=F)
 
 ########## check file
 rm(list=ls())
 d <- read.table("C://Users/mkarnauskas/Desktop/red_snapper/Mar2016/redSnapperSett_GOM_ATL_hires.txt", sep="\t")
 map("state", ylim=c(24, 36), xlim=c(-100, -75))  # check
-for (i in 1:117)  {
+for (i in 46:117)  {
   f <- d[which(d$V3==i),]
   polygon(f, col=i)  }
 
