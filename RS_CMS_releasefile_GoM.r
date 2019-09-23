@@ -108,14 +108,14 @@ hist(rel$depest)
 length(which(rel$depest<45))
 length(which(rel$depest>=45))
 
-rel$spawndep <- rel$depest - 5
+rel$spawndep <- rel$depest - 5       # set spawning 5m above sea floor
 rel$spawndep[which(rel$spawndep > 45)] <- 45
 
-minspawndep <- 13
+minspawndep <- 13                    #  set minimum spawning depth here -- need to check 
 
 length(which(rel$depest<=minspawndep))
 dim(rel)
-tapply(rel$N, rel$depest<=minspawndep, sum)
+tapply(rel$N, rel$depest<=minspawndep, sum)   # number of particles lost by setting min spawning depth
 rel <- rel[which(rel$depest>minspawndep),]
 dim(rel)
 
@@ -145,43 +145,49 @@ cols <- rainbow(102)
 points(rel$lon, rel$lat, pch=19, cex=0.5, col=cols[rel$polynams])
 points(rel$lon, rel$lat, pch=19, cex=0.5, col=rel$polynams)
               
-###################  MAKE RELEASE FILE  #####################################
-######################### input temporal information ###########################
+########################     TEMPORAL INFORMATION      #########################
 
-days <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/RELEASEFILE_INDEXnew.csv", sep=",", header=T)     # this inputs a file which references lunar phases and peak spawning times with all dates from 2004 - 2008
-#days$red_snapper[which(days$mo==4)] <- 1
-sp <- which(days$red_snapper==1 & days$yr==2004)          # adjust year as necessary to line up with simulation year
-sp <- sp[seq(1, length(sp)-1, 6)]                         # every 6 days or every 3 days
-#sp <- sp[seq(1, length(sp)-1, 3)]
-lis <- days[sp, 1:3]
-dim(lis)
-lis <- lis[-1,]                                          # so that even number in each year
-lis <- lis[which(lis$mo<9),]
+days <- as.Date(format("2004-01-01"))+0:364        #  modify starting year here 
+days
+
+sp <- data.frame(substr(days, 1, 4))
+names(sp) <- "yr"
+sp$yr <- as.numeric(as.character(sp$yr))
+sp$mo <- as.numeric(as.character(substr(days, 6, 7)))
+sp$da <- as.numeric(as.character(substr(days, 9, 10)))
+sp$doy <- (1:365)/365   
+sp              
+
+lis <- sp[seq(1, length(days), 6), ]               # releases every 6 days 
+head(lis)
+
+#  spawning relationship from Porch et al. 2015
+lis$spawnact <- (lis$doy/0.536)^(0.536/0.024) * exp((0.536-lis$doy)/0.024)
+plot(lis$doy, lis$spawnact)
+cutoff <- 0.15; abline(h=cutoff)                   # determine cutoff here 
+sum(lis$spawnact[which(lis$spawnact > cutoff)]) / sum(lis$spawnact)   # calculate percentile spawning activity included with given cutoff                    
+lis <- lis[which(lis$spawnact > cutoff), ]
+points(lis$doy, lis$spawnact, col=2, cex=0.8)      # check cutoff
 
 table(lis$yr)
 table(lis$yr, lis$mo)
-dim(lis)
-lis2 <- lis
+dim(lis)    
 
-for (i in 2005:2010) {                                  # adjust for multiple years as necessary to match simulation years
-   lis2$yr <- i
-   lis <- rbind(lis, lis2) }
+lis2 <- lis
+#for (i in 2005:2010) {                             #  for multiple years
+#   lis2$yr <- i
+#   lis <- rbind(lis, lis2) }
 
 dim(lis)
 table(lis$yr, lis$mo)
 table(lis$yr)
 mean(table(lis$yr))
 
-################  spawning seasonality from Porch et al. 2015  #################
-lis$doy <- NA
-dinmon <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-for (i in 1:nrow(lis))  {  lis$doy[i] <- (sum(dinmon[1:lis$mo[i]]) + lis$da[i]) / 365  }
-lis$spawnact <- (lis$doy/0.536)^(0.536/0.024) * exp((0.536-lis$doy)/0.024)
 plot(lis$doy, lis$spawnact)
 plot(lis$spawnact)
-plot(lis$spawnact[1:70])
 
 lis <- lis[-c(4)]
+head(lis) 
 
 ###############  input spatial site information (from above)  ###################
 
@@ -229,14 +235,7 @@ matfin <- matfin[which(matfin$V5 >0),]
 head(matfin)
 dim(matfin)
 mean(matfin$V5); min(matfin$V5); max(matfin$V5)
-sum(matfin$V5)                              # currently at 19 million particles -- will reduce when combined
-
-getwd()
-dim(matfin)
-dim(matfin)/8
-
-matfinGOM <- matfin
-save(matfinGOM, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/GOMreleaseForScaling_SABGOM.RData")
+sum(matfin$V5)                              # currently at 3 million particles -- will reduce when combined
 
 # double check
 table(matfin$V6, matfin$V7)
@@ -247,11 +246,16 @@ diff(table(matfin$V6))
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
 
-f <- which(matfin$V6==2008 & matfin$V7 == 8 & matfin$V8 == 29); length(f)   # non-peak spawning 
-plotonmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
+f <- which(matfin$V6==2004 & matfin$V7 == 9 & matfin$V8 == 27); length(f)   # non-peak spawning 
+plotonmap(matfin$V5[f]/10, matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
-f <- which(matfin$V6==2008 & matfin$V7 == 6 & matfin$V8 == 24); length(f)   # peak spawning
-plotonmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
+f <- which(matfin$V6==2004 & matfin$V7 == 6 & matfin$V8 == 23); length(f)   # peak spawning
+plotonmap(matfin$V5[f]/10, matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
+
+#############################  save output  ####################################
+getwd()
+matfinGOM <- matfin
+save(matfinGOM, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/GOMreleaseForScaling_SABGOM.RData")
 
 ####################   END GOM RELEASE LOCATIONS   #############################
 ################################################################################

@@ -1,3 +1,20 @@
+
+****************************************************************************************************************************************
+23 Sept 2019 
+FIXED PENDING ISSUES FROM 12 Sept
+Continue cleaning of release files for 3 different regions
+- extract all dates and subset by threshold spawning activity -- set to encompass 95% of spawning activity
+- dates aligned -- starting Mar 1 every 6 days
+
+GROUP QUESTIONS: 
+- how to set minimum spawning depth?  - current at 13m, is this a good cutoff?
+
+New files: 
+	scale_releases.r  	(for combining three regions and scaling)
+
+ 
+
+****************************************************************************************************************************************
 12 Sept 2019
 Cleaned up release files for 3 different regions
 
@@ -9,9 +26,12 @@ Forgot to incorporate total area in the ratio calculation.  CPUE should be scale
 Started work to modify date extraction on Tortugas release file code; adopt for other regions when complete and tested.  
 
 
+****************************************************************************************************************************************
 9Sept2019
 Dug up old settlement polygon file, refined polygons in Atl to match resolution in Gulf
 
+
+****************************************************************************************************************************************
 12June2019
 ran ATL simulations and put in new folder: runGulf_HYCOM150
 * note - error with 2009 in GoM runs 0 - throwing -5 exit code for some dates (missing oc data -why??) 
@@ -21,6 +41,7 @@ added some additional checks to post_proc_GoM_Atl code - screening traj_files fo
 
 
 
+****************************************************************************************************************************************
 11June2019
 - cleaned up file names, organized in MASTER_codes folder and cleaned up codes
   ** changed code for assigning depth of spawning -- now specific to hydrodynamic nest to avoid (-1) exit code error

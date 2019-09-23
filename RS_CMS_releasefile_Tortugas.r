@@ -9,10 +9,12 @@
 rm(list=ls())
 library(maps)
 
-###########    import video data from Matt Campbell 
-d <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/rfvm_sm_sta.csv", sep=",", header=T)
+#########################     SPATIAL INFORMATION      #########################
 
 source("C:/Users/mkarnauskas/Desktop/completed_manuscripts/RS_mapping_paper/plotting.r")
+
+###########    import video data from Matt Campbell 
+d <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/rfvm_sm_sta.csv", sep=",", header=T)
 
 d$LUTJANUS_CAMPECHANUS[is.na(d$LUTJANUS_CAMPECHANUS)]<- 0
 plotonmap(d$LUTJANUS_CAMPECHANUS, d$sta_lon, d$sta_lat, 15, 0.4)
@@ -35,19 +37,19 @@ dat                                    # only 4 locations observed outside of su
 co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
 
 ################  plot original recruitment habitat grid cells  ################
-plot(1, xlim=c(-98,-76), ylim=c(24,35))
+map("usa", xlim=c(-98,-76), ylim=c(24,35))
 for (j in unique(co[,3]))  {
   m <- co[which(co[,3]==j),]; polygon(m, col=j)
   text(m[1,1], m[1,2], m[1,3], cex=0.6)      }
 points(dat$lon, dat$lat, pch=19, cex=0.5)             # release locations
 
-##########  get polygon numbers for release locations  ##############
+##################  get polygon numbers for release locations  #################
 
 polynams <- 74
 rel <- cbind(polynams, dat)
 rel
 
-###############################     ADD DEPTH      ##################################################
+###############################     add depth      #############################
 
 library(ncdf4)
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    
@@ -60,17 +62,12 @@ v1 <- nc$var[[2]]
 v <- ncvar_get(nc, v1)
 dim(v)
 nc_close(nc)
+
 lon <- nc$var[[1]]$dim[[1]]$vals - 360
 lat <- nc$var[[1]]$dim[[2]]$vals
 dep <- nc$var[[1]]$dim[[3]]$vals
 cur <- sqrt(u^2 + v^2)
 image(lon, lat, cur[,,1], add=T)
-
-#d <- matrix(NA, 976, 694)
-#for (i in 1:341) {
-#  for (j in 1:257) {
-#     d[i,j] <- dep[max(which(!is.na(u[i,j,])))]  }}
-#image(lon, lat, d)
 
 rel$depest <- NA
 for (i in 1:nrow(rel)) {  rel$depest[i] <- dep[max(which(!is.na(u[which.min(abs(lon - rel$lon[i])), which.min(abs(lat - rel$lat[i])),])))]   }
@@ -79,51 +76,64 @@ head(rel)
 length(which(rel$depest<45))
 length(which(rel$depest>=45))
 
-rel$spawndep <- rel$depest - 2
+rel$spawndep <- rel$depest - 5       # set spawning 5m above sea floor
 rel$spawndep[which(rel$spawndep > 45)] <- 45
 
-minspawndep <- 13
+minspawndep <- 13                    #  set minimum spawning depth here -- need to check 
 
 length(which(rel$depest<=minspawndep))
 dim(rel)
-tapply(rel$N, rel$depest<=minspawndep, sum)
+tapply(rel$N, rel$depest<=minspawndep, sum)   # number of particles lost by setting min spawning depth
 rel <- rel[which(rel$depest>minspawndep),]
 rel
 
-###################  MAKE RELEASE FILE  #####################################
-######################### input temporal information ###########################
+plot(rel$depest, rel$spawndep)
+table(rel$spawndep < rel$depest)
+table(rel$spawndep)
+table(rel$depest, rel$spawndep)
 
-days <- as.Date(format("2010-01-01"))+0:364
-lis <- data.frame(substr(days, 1, 4))
-lis$ <- data.frame(substr(days, 1, 4))
-(yr, mon, da, doy, spawnact)
+########################     TEMPORAL INFORMATION      #########################
 
-sp <- days[seq(1, length(days), 6)]
-doy <- seq(1, length(days), 6)/365
+days <- as.Date(format("2004-01-01"))+0:364        #  modify starting year here 
+days
+
+sp <- data.frame(substr(days, 1, 4))
+names(sp) <- "yr"
+sp$yr <- as.numeric(as.character(sp$yr))
+sp$mo <- as.numeric(as.character(substr(days, 6, 7)))
+sp$da <- as.numeric(as.character(substr(days, 9, 10)))
+sp$doy <- (1:365)/365   
+sp              
+
+lis <- sp[seq(1, length(days), 6), ]               # releases every 6 days 
+head(lis)
+
+lis$spawnact <- (lis$doy/0.536)^(0.536/0.024) * exp((0.536-lis$doy)/0.024)
+plot(lis$doy, lis$spawnact)
+cutoff <- 0.15; abline(h=cutoff)                   # determine cutoff here 
+sum(lis$spawnact[which(lis$spawnact > cutoff)]) / sum(lis$spawnact)   # calculate percentile spawning activity included with given cutoff                    
+lis <- lis[which(lis$spawnact > cutoff), ]
+points(lis$doy, lis$spawnact, col=2, cex=0.8)      # check cutoff
 
 table(lis$yr)
 table(lis$yr, lis$mo)
-dim(lis)
-lis2 <- lis
+dim(lis)    
 
-for (i in 2005:2010) {
-   lis2$yr <- i
-   lis <- rbind(lis, lis2) }
+lis2 <- lis
+#for (i in 2005:2010) {                             #  for multiple years
+#   lis2$yr <- i
+#   lis <- rbind(lis, lis2) }
 
 dim(lis)
 table(lis$yr, lis$mo)
 table(lis$yr)
 mean(table(lis$yr))
 
-lis$doy <- NA
-dinmon <- c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-for (i in 1:nrow(lis))  {  lis$doy[i] <- (sum(dinmon[1:lis$mo[i]]) + lis$da[i]) / 365  }
-lis$spawnact <- (lis$doy/0.536)^(0.536/0.024) * exp((0.536-lis$doy)/0.024)
 plot(lis$doy, lis$spawnact)
 plot(lis$spawnact)
-plot(lis$spawnact[1:70])
 
 lis <- lis[-c(4)]
+head(lis) 
 
 ###############  input spatial site information (from above)  ###################
 
@@ -137,6 +147,7 @@ mean(m$N); min(m$N); max(m$N)
 which(m$N==0)
 
 prod(nrow(lis), nrow(m))
+
 ###################### now, making the release file ############################
 
 mat <- as.data.frame(matrix(data=NA, nrow=nrow(lis)*nrow(m), ncol=9))   # empty matrix to be filled
@@ -166,25 +177,24 @@ matfin <- mat[-c(10)]
 head(matfin)
 dim(matfin)
 table((matfin$V5 >0))
-table((matfin$V5 >0))[1] / nrow(matfin)
+table((matfin$V5 >0))[1] / nrow(matfin)     # number of rows lost to rounding
 matfin <- matfin[which(matfin$V5 >0),]
 head(matfin)
 dim(matfin)
 mean(matfin$V5); min(matfin$V5); max(matfin$V5)
 sum(matfin$V5)
 
-getwd()
-dim(matfin)
-dim(matfin)/8
-
-save(matfin, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/KEYSreleaseForScaling_SABGOM.RData")
-
-# double check
-table(matfin$V6, matfin$V7)
+# double check that outputs are scaled correctly 
+table(matfin$V6, matfin$V7)                            # check months of spawning
 table(matfin$V6)
 matplot(table(matfin$V7, matfin$V6), type="l")
 diff(table(matfin$V6))
 
-tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
-matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
+tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)     # check seasonal spawning 
+matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")   
 
+#############################  save output  ####################################
+getwd()
+save(matfin, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/KEYSreleaseForScaling_SABGOM.RData")
+
+#################################   END   ######################################
