@@ -15,8 +15,8 @@ library(ncdf4)
 library(sp)
 library(maps)
 
-source("C:/Users/mkarnauskas/Desktop/RS_FATEproject/plotting.r")                                                                                                  
-load("C:/Users/mkarnauskas/Desktop/RS_FATEproject/FINAL_MAPPING_RESULTS.RData")        #  Fwith_platform is index to be used
+source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plotting.r")                                                                                                  
+load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_CODES/FINAL_MAPPING_RESULTS_ext.RData")        #  Fwith_platform is index to be used
 head(mat)
 
 #plotonmap(mat$Fwith_resid, mat$statlon, mat$statlat, 15, 0.9, addplus=T); text(-90.5,26.25, "index of fecundity")
@@ -27,7 +27,7 @@ dat <- data.frame(cbind(mat$statlon, mat$statlat, mat$Ftotal))
 names(dat) <- c("lon", "lat", "N")
 
 ################################################################################                                                    
-co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
+co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
 
 ################  plot original recruitment habitat grid cells  ################
 plot(1, xlim=c(-98,-81), ylim=c(24,31))
@@ -77,8 +77,8 @@ points(rel$lon, rel$lat, pch=19, cex=0.5, col=rel$polynams)
 ###  !!!! NOTE !!!! 
 ###  Important to use nest from simulation to be run to avoid particles being trapped below surface 
 #
-#nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    
-nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # this is SABGOM nest_1
+#nc <- nc_open("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/nest_1_20080501000000_HYCOM150.nc")    
+nc <- nc_open("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # this is SABGOM nest_1
 
 v1 <- nc$var[[1]]
 u <- ncvar_get(nc, v1)
@@ -97,7 +97,7 @@ image(lon, lat, cur[,,1], xlim=c(-100, -80), ylim=c(24,31))
 
 rel$depest <- NA
 for (i in 1:nrow(rel)) {  rel$depest[i] <- dep[max(which(!is.na(u[which.min(abs(lon - rel$lon[i])), which.min(abs(lat - rel$lat[i])),])))] }
-head(rel)
+head(rel)                 # warnings OK here! 
 
 points(rel$lon, rel$lat, pch=19, col=is.na(rel$depest))
 rel$depest[is.na(rel$depest)] <- 0
@@ -144,6 +144,7 @@ map('usa', add=T)
 cols <- rainbow(102)  
 points(rel$lon, rel$lat, pch=19, cex=0.5, col=cols[rel$polynams])
 points(rel$lon, rel$lat, pch=19, cex=0.5, col=rel$polynams)
+abline(v=(-89))
               
 ########################     TEMPORAL INFORMATION      #########################
 
@@ -255,7 +256,7 @@ plotonmap(matfin$V5[f]/10, matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 #############################  save output  ####################################
 getwd()
 matfinGOM <- matfin
-save(matfinGOM, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/GOMreleaseForScaling_SABGOM.RData")
+save(matfinGOM, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/GOMreleaseForScaling_SABGOM.RData")
 
 ####################   END GOM RELEASE LOCATIONS   #############################
 ################################################################################
