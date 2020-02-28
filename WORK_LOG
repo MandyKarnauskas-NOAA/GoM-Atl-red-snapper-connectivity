@@ -1,3 +1,13 @@
+
+28 Feb 2020
+
+- Changed scaling routine after deciding it will be easier to subsample for changes in age structure post-simulation for now, scale abundances Gulf vs Atl so that they are 1:1 by area
+- Differences in abundance and age structure will be accounted for by sub-sampling simulation data
+
+scaledGoMAtl.RData - this is new scaled GOM/ATL map, scaled such that densities (abundance per area) are 1:1 between WFS and all of Atlantic.  
+
+****************************************************************************************************************************************
+
 17 Dec 2019
 
 Fixed error in FINAL_MAPPING_RESULTS_ext.RData - error merging AL artificial reef interpolation data
@@ -5,6 +15,7 @@ GoM map now includes interpolation to Keys
 Edited scale_releases.r to reflect 2-area scaling (Gulf vs. Atl only)
 
 TO DO: scale Gulf/Atl 1:1 and create release file, run simulation - check areal domain for Kyle's HB calculation
+From Kyle Jul 31:  In the headboat data analysis, the mean ratio of CPUE from the West coast of FL to the Atlantic is 4.4 with 95%CI of (4.1, 4.7) - check that this is in number? 
 
 ****************************************************************************************************************************************
 6 Dec 2019
