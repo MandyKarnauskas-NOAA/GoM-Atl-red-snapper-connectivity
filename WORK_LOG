@@ -1,7 +1,7 @@
-
+****************************************************************************************************************************************
 28 Feb 2020
 
-- Changed scaling routine after deciding it will be easier to subsample for changes in age structure post-simulation for now, scale abundances Gulf vs Atl so that they are 1:1 by area
+- Changed scaling routine after deciding it will be easier to subsampl for changes in age structure post-simulation for now, scale abundances Gulf vs Atl so that they are 1:1 by area
 - Differences in abundance and age structure will be accounted for by sub-sampling simulation data
 
 scaledGoMAtl.RData - this is new scaled GOM/ATL map, scaled such that densities (abundance per area) are 1:1 between WFS and all of Atlantic.  
