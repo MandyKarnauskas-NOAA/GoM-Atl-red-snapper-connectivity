@@ -16,7 +16,7 @@ library(sp)
 library(maps)
 
 source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plotting.r")                                                                                                  
-load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_CODES/FINAL_MAPPING_RESULTS_ext.RData")        #  Fwith_platform is index to be used
+load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject//FINAL_MAPPING_RESULTS_ext.RData")        #  Fwith_platform is index to be used
 head(mat)
 
 #plotonmap(mat$Fwith_resid, mat$statlon, mat$statlat, 15, 0.9, addplus=T); text(-90.5,26.25, "index of fecundity")
@@ -93,7 +93,7 @@ dep <- nc$var[[1]]$dim[[3]]$vals
 cur <- sqrt(u^2 + v^2)
 
 image(lon, lat, cur[,,1])
-image(lon, lat, cur[,,1], xlim=c(-100, -80), ylim=c(24,31))
+image(lon, lat, cur[,,1], xlim=c(-100, -80), ylim=c(18,31))
 
 rel$depest <- NA
 for (i in 1:nrow(rel)) {  rel$depest[i] <- dep[max(which(!is.na(u[which.min(abs(lon - rel$lon[i])), which.min(abs(lat - rel$lat[i])),])))] }
@@ -164,8 +164,8 @@ head(lis)
 
 #  spawning relationship from Porch et al. 2015
 lis$spawnact <- (lis$doy/0.536)^(0.536/0.024) * exp((0.536-lis$doy)/0.024)
-plot(lis$doy, lis$spawnact)
-cutoff <- 0.15; abline(h=cutoff)                   # determine cutoff here 
+plot(lis$doy, lis$spawnact, xlab="day of year", ylab="spawning activity")
+cutoff <- 0.15; abline(h=cutoff, col=2)                   # determine cutoff here 
 sum(lis$spawnact[which(lis$spawnact > cutoff)]) / sum(lis$spawnact)   # calculate percentile spawning activity included with given cutoff                    
 lis <- lis[which(lis$spawnact > cutoff), ]
 points(lis$doy, lis$spawnact, col=2, cex=0.8)      # check cutoff

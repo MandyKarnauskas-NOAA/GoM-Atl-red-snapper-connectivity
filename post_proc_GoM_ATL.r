@@ -1,12 +1,6 @@
 rm(list=ls())
 
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/initial_run")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/compOcMod/GoM_run_SABGOM")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/Oct26run_newmap")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
-
-setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/runGulf_HYCOM150")                                                                             
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/SABGOM1")
 
 ##############  concatenate files  ###################                                   
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -16,28 +10,33 @@ for (i in filelist)  { newdat <- read.table(i); dat <- rbind(dat, newdat) }
 colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
 ##########################################################
 
+co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
+map("state", ylim=c(24, 36), xlim=c(-100, -75))  # check
+for (i in 1:117)  {
+  f <- co[which(co$V3==i),]
+  polygon(f, col=i)  
+  text(mean(f$V1), mean(f$V2), mean(f$V3))}
+
 dat$reg <- "GOM"
-dat$reg[which(dat$ret_poly > 76)] <- "ATL"
+dat$reg[which(dat$ret_poly > 77)] <- "ATL"
 
 dat$rel_reg <- "GOM"
-dat$rel_reg[which(dat$rel_poly > 76)] <- "ATL"
+dat$rel_reg[which(dat$rel_poly > 77)] <- "ATL"
 
 ###########################  specify release file  #############################
-#d <- read.table("C://Users/mkarnauskas/Desktop/RSmap_SA/RS_ATL_releaseOct25.txt")
-d1 <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/fullGoM_release_HYCOM150.txt")
-d2 <- read.table("C://Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt")
-d <- rbind(d1, d2)
+
+d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
 
 d$reg <- "GOM"
-d$reg[which(d$V1 > 76)] <- "ATL"
+d$reg[which(d$V1 > 77)] <- "ATL"
 
 tapply(d$V5, d$reg, sum)     #   ATL    GOM 
                             # 615783 677733
                             
-length(which(dat$rel_poly > 76 & dat$ret_poly  > 76))    # 517049 = spawned in ATL, recruited in ATL
-length(which(dat$rel_poly <= 76 & dat$ret_poly > 76))    # 8080   = spawned in GOM, recruited in ATL
-length(which(dat$rel_poly <= 76 & dat$ret_poly <= 76))   # 291605 = spawned in GOM, recruited in GOM
-length(which(dat$rel_poly > 76 & dat$ret_poly  <= 76))   # 72     = spawned in ATL, recruited in GOM
+length(which(dat$rel_poly > 77 & dat$ret_poly  > 77))    # 517049 = spawned in ATL, recruited in ATL
+length(which(dat$rel_poly <= 77 & dat$ret_poly > 77))    # 8080   = spawned in GOM, recruited in ATL
+length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77))   # 291605 = spawned in GOM, recruited in GOM
+length(which(dat$rel_poly > 77 & dat$ret_poly  <= 77))   # 72     = spawned in ATL, recruited in GOM
 
 length(which(dat$rel_poly > 77 & dat$ret_poly > 77))/sum(d$V5)     # 0.8394142    = spawned in ATL, recruited in ATL
 length(which(dat$rel_poly <= 77 & dat$ret_poly > 77))/sum(d$V5)    # 0.01136878   = spawned in GOM, recruited in ATL
@@ -69,6 +68,8 @@ a
 rm(list=ls())
 
 library(ncdf4)
+
+getwd()
 
 nc <- nc_open("traj_file_2.nc")
 
@@ -102,6 +103,7 @@ dep[2,which(cod==(-1))]
 hist(dep[2,which(cod==(-1))])
 hist(dep[2,])
 
+windows()
 par(mfrow=c(6,5), mex=0.6)
 for (i in 1:30) { hist(dep[i,], breaks=seq(0,100,5)) }
 
@@ -133,13 +135,7 @@ max(dep[2,])
 
 rm(list=ls())
 
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/initial_run")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/compOcMod/GoM_run_SABGOM")
-# setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/Oct26run_newmap")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
-
-setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/runGulf_HYCOM150")   
+getwd()
 
 library(ncdf4)
 library(maps)
@@ -147,18 +143,18 @@ library(maps)
 ##########  bathymetry  ##############
 
 #save(x,y,z,cols, file="GEBCO_bathy.RData")
-load("C:/Users/mkarnauskas/Desktop/RS_FATEproject/GEBCO_bathy.RData")        # stored GEBCO data and color scheme
+load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/GEBCO_bathy.RData")        # stored GEBCO data and color scheme
 
 ###############  plots by year  
-yrs <- c(2008, 2009)
+yrs <- c(2008)
 
 par(mfrow=c(3,1), mex=0.6)
 
 maxlat <- rep(NA, 7)
 
-numlarv <- 200
+numlarv <- 500
 
-for (m in 1:2) {
+for (m in 1:1) {
   nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
@@ -173,19 +169,22 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v6 <- nc$var[[6]]
   cod <- ncvar_get(nc, v6)  # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
 nc_close(nc)
+}
 
 #  i <- which(cod == (-4))
 #  la <- rep(NA, length(i))
 #      for (j in i) {   la[j] <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]  } 
 #  maxlat[m] <- mean(la, na.rm=T)     }
 
-map('usa', xlim=c(-98, -76), ylim=c(24,35), col=0)
+map('usa', xlim=c(-98, -76), ylim=c(24,35), col=1)
 #map('usa', xlim=c(-85.5, -75), ylim=c(23.85,35), col=0)
-image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
+#image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
 legend("topleft", paste(yrs[m]), cex=1.2, text.font=2, bty="n")
   i <- which(cod == (-4))
   k <- i[seq(1, length(i), length.out=numlarv*2)]
-  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") } 
+  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FF00FF20") } 
+  
+  
   
   i <- which(cod == (-4))
   k <- i[seq(1, length(i), length.out=numlarv)]  
@@ -327,11 +326,7 @@ k <- i[seq(1, length(i), length.out=500)]
 ######################   CONNECTIVITY MATRIX   ##########################
 
 rm(list=ls())
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/initial_run")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/GoM_Atl_conn")
-#setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/Oct26run_newmap")
-setwd("C://Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap")
-setwd("C:/Users/mkarnauskas/Desktop/RS_FATEproject/13Jun2018run_newSmap/ATL_S_with_glbHYCOM")
+getwd()
 
 ##############  concatenate files  ###################
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -345,7 +340,8 @@ colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_de
 
 library(maps)
 ##############################################################################################
-d <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/CMSfiles/redSnapperSett_GOM_ATL.xyz", sep="\t", header=F)
+
+d <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
 names(d) <- c("lon", "lat", "pol")
 
 ##########  plot new grid cells  #########################
@@ -354,7 +350,7 @@ pols <- unique(d$pol)
 are <- rep(NA, length(unique(d$pol)))
 
 plot(0, ylim=c(24, 36), xlim=c(-100, -75))  # check
-for (i in 1:96)  {
+for (i in 1:117)  {
   f <- d[which(d$pol==i),]
   polygon(f, border=1)  }
  map('state', add=T)
@@ -363,9 +359,10 @@ text(tapply(d$lon, d$pol, mean), tapply(d$lat, d$pol, mean), unique(d$pol), cex=
 
 are[1:41] <- "W GoM"
 are[42:76] <- "E GoM"
-are[77:85] <- "W FL"
-are[86:91] <- "GA & SC"
-are[92:96] <- "NC"
+are[77:89] <- "E FL"
+are[90:95] <- "GA"
+are[96:106] <- "SC"
+are[107:117] <- "NC"
 
 are <- as.factor(are)
 tab <- table(pols, are)
@@ -384,18 +381,21 @@ mins <- tapply(pols, are, min)
 tklocs <- maxs + 0.5
 lablocs <- sort((tklocs-mins-0.5)/2 + mins)       # used in plotting later
 
-egom <- which(tab[,1]==1)
-ga <- which(tab[,2]==1)
-nc <- which(tab[,3]==1)
-wfl <- which(tab[,4]==1)
-wgom <- which(tab[,5]==1)
+efl <- which(tab[,1]==1)
+egom <- which(tab[,2]==1)
+ga <- which(tab[,3]==1)
+nc <- which(tab[,4]==1)
+sc <- which(tab[,5]==1)
+wgom <- which(tab[,6]==1)
 
 dat$state <- NA
 dat$state[which(dat$ret_poly<=max(egom))] <- "E GOM"
 dat$state[which(dat$ret_poly>=min(wgom) & dat$ret_poly<=max(wgom))] <- "W GOM"
-dat$state[which(dat$ret_poly>=min(wfl) & dat$ret_poly<=max(wfl))] <- "W FL"
-dat$state[which(dat$ret_poly>=min(ga) & dat$ret_poly<=max(ga))] <- "GA & SC"
+dat$state[which(dat$ret_poly>=min(efl) & dat$ret_poly<=max(efl))] <- "E FL"
+dat$state[which(dat$ret_poly>=min(ga) & dat$ret_poly<=max(ga))] <- "GA"
+dat$state[which(dat$ret_poly>=min(sc) & dat$ret_poly<=max(sc))] <- "SC"
 dat$state[which(dat$ret_poly>=min(nc))] <- "NC"
+
 
 ##################################################################################
 
@@ -464,13 +464,13 @@ main="GoM - Atl connectivity HYCOM 1/50 deg model - 2008")
 #, xlim=c(57, 96), ylim=c(57,96)
 #, main="GoM - Atl SABGOM connectivity 2004 - 2010")
 
-axis(1, at=tklocs, lab=rep("", 5))
-axis(2, at=tklocs, lab=rep("", 5))
+axis(1, at=tklocs, lab=rep("", 6))
+axis(2, at=tklocs, lab=rep("", 6))
 #lablocs[2] <- 74
-axis(2, at=lablocs, lab=c("W GOM", "E GOM", "W FL", "GA / SC", "NC"), tick=F, cex=1, las=2)
-axis(1, at=lablocs, lab=c("W GOM", "E GOM", "W FL", "GA / SC", "NC"), tick=F, cex=1, las=2)
+axis(2, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
+axis(1, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
 box(); abline(0,1, lty=2)
-abline(v=tklocs[1], lty=1); abline(h=tklocs[1], lty=1)
+abline(v=tklocs[2], lty=1); abline(h=tklocs[2], lty=1)
 
 mtext(side=2, line=3.5, "Source Node", font=2)
 mtext(side=1, line=3.5, "Receiving Node", font=2)
@@ -491,11 +491,11 @@ mtext(side=1, line=3.5, "Receiving Node", font=2)
 # mtext(side=1, line=3.75, "Receiving node                ", font=2)
 # mtext(side=2, line=3.75, "Source node                ", font=2)
 
-  resmat[k-2002,1] <- k
-  resmat[k-2002,2] <- sum(sum(settle[1:max(egom),1:max(egom)]))
-  resmat[k-2002,3] <- sum(sum(settle[1:max(egom),min(wfl):max(nc)]))
-  resmat[k-2002,4] <- sum(sum(settle[min(wfl):max(nc),1:max(egom)]))
-  resmat[k-2002,5] <- sum(sum(settle[min(wfl):max(nc),min(wfl):max(nc)]))   }
+#  resmat[k-2002,1] <- k
+#  resmat[k-2002,2] <- sum(sum(settle[1:max(egom),1:max(egom)]))
+#  resmat[k-2002,3] <- sum(sum(settle[1:max(egom),min(wfl):max(nc)]))
+#  resmat[k-2002,4] <- sum(sum(settle[min(wfl):max(nc),1:max(egom)]))
+#  resmat[k-2002,5] <- sum(sum(settle[min(wfl):max(nc),min(wfl):max(nc)]))   }
 
 ####  color bar plot
 par(mar=c(0,2,0,0))   

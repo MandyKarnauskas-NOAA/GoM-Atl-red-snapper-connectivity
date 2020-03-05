@@ -1,3 +1,22 @@
+
+****************************************************************************************************************************************
+3 Mar 2020
+
+- going back to check codes but found issue.  RS_CMS_releasefile_ATL.r has different set of dates.  
+	ATLreleaseForScaling_SABGOM.RData should start with releases on Mar 1 and current version of RS_CMS_releasefile_ATL.r code results in Feb 29 start
+	UNRESOLVED - leave extant version of ATLreleaseForScaling_SABGOM.RData for now.  
+
+- Added additional vertical matrices based on lane snapper and gray snapper LH for sensitivities. 
+- scaledGOMATLrel20040617.txt is a test run file for one date
+
+- edited post_proc file to account for increased resolution in .xyz settlement file
+
+NOTE WORK FLOW: 
+- first build files for separate regions using RS_CMS_releasefile_GoM.r and RS_CMS_releasefile_ATL.r
+	- parse out 95% spawning activity
+	- assign depth of releases based on .nc nest files
+- then combine using scale_releases_1to1.r
+
 ****************************************************************************************************************************************
 28 Feb 2020
 

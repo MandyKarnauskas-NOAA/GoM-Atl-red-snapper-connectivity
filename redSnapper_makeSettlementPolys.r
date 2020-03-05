@@ -195,7 +195,7 @@ write.table(pols, file="C://Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_code
 
 ########## check file
 rm(list=ls())
-d <- read.table("C://Users/mkarnauskas/Desktop/red_snapper/Mar2016/redSnapperSett_GOM_ATL_hires.txt", sep="\t")
+d <- read.table("CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
 map("state", ylim=c(24, 36), xlim=c(-100, -75))  # check
 for (i in 46:117)  {
   f <- d[which(d$V3==i),]

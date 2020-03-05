@@ -7,7 +7,7 @@
 #
 ################################################################################
 rm(list=ls())
-setwd("C:/Users/mkarnauskas/Desktop/RSmap_SA")
+setwd("C:/Users/mandy.karnauskas/Desktop/RSmap_SA")
 
 #######################   libraries and functions   ############################
 if (!"ncdf4" %in% installed.packages()) install.packages("ncdf4", repos='http://cran.us.r-project.org')
@@ -53,7 +53,7 @@ plot(ref$doy, ref$temp)
     
 preddoy <- data.frame()
 
-for (i in seq(0, 1, 6/365))  {      ########  NOTE!!!!   #####   revisit this later.
+for (i in seq(0.005479452, 1, 6/365))  {      ########  NOTE!!!!   #####   revisit this later.
         doy <- i                                      # inclusion of temp prediction based on doy causes bimodal peak in spawning season
         samp$doy <- i
         samp$lunar <- mean(d$lunar)                                             # use average lunar phase
@@ -92,7 +92,7 @@ mtext(side=3, line=0.5, paste("day of year", round(i*365))) }
 windows()
 plot(dat$doy, dat$N)
 tab <- tapply(dat$N, dat$doy, sum)
-plot(as.numeric(names(tab)), tab)
+plot(as.numeric(names(tab)), tab, xlab="day of year", ylab="spawning activity")
 cutoff <- 4950000; abline(h=cutoff, col=2)                   # determine cutoff here 
 sum(tab[which(tab > cutoff)]) / sum(tab)   # calculate percentile spawning activity included with given cutoff                    
 dim(dat)
@@ -102,7 +102,7 @@ plot(dat$doy, dat$N)     # check cutoff
 
 ##########################  assign polygon labels  #############################
 
-co <- read.table("C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
+co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
          
 ################################################################################
 
@@ -165,7 +165,7 @@ points(rel$lon, rel$lat, pch=19, cex=0.5, col=rel$polynams)          #  check
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_1_20070701000000.nc")          # SABGOM Gulf nest
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/Hatteras_issue/CMS_inputs_outputs/nest2AtlSABGOM.nc")
 #nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/Hatteras_issue/CMS_inputs_outputs/nest_smallHatteras.nc")
-nc <- nc_open("C:/Users/mkarnauskas/Desktop/RS_FATEproject/nest_2_20070701000000.nc")          # SABGOM Atl nest
+nc <- nc_open("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/nest_2_20070701000000.nc")          # SABGOM Atl nest
 
 v1 <- nc$var[[1]]
 u <- ncvar_get(nc, v1)
@@ -289,7 +289,7 @@ plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 f <- which(matfin$V6==2004 & matfin$V7 == 6 & matfin$V8 == 23); length(f)      # peak spawning
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
-save(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling_SABGOM.RData")          # WRITE FILE TO TXT
+save(matS, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling_SABGOM.RData")          # WRITE FILE TO TXT
 
 #write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 #write.table(matN, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
