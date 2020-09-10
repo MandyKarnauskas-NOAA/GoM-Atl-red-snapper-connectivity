@@ -1,6 +1,17 @@
+
 rm(list=ls())
+######################################################
+if (!"ncdf4" %in% installed.packages()) install.packages("ncdf4", repos='http://cran.us.r-project.org')
+if (!"sp" %in% installed.packages()) install.packages("sp", repos='http://cran.us.r-project.org')
+if (!"maps" %in% installed.packages()) install.packages("maps", repos='http://cran.us.r-project.org')
+library(maps)
+library(ncdf4)
+library(sp)
+######################################################
 
 setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/SABGOM1")
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TESTRUN")
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TEST_NOBUOY")
 
 ##############  concatenate files  ###################                                   
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -26,6 +37,8 @@ dat$rel_reg[which(dat$rel_poly > 77)] <- "ATL"
 ###########################  specify release file  #############################
 
 d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
+d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20040617.txt")
+
 
 d$reg <- "GOM"
 d$reg[which(d$V1 > 77)] <- "ATL"
@@ -38,14 +51,22 @@ length(which(dat$rel_poly <= 77 & dat$ret_poly > 77))    # 8080   = spawned in G
 length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77))   # 291605 = spawned in GOM, recruited in GOM
 length(which(dat$rel_poly > 77 & dat$ret_poly  <= 77))   # 72     = spawned in ATL, recruited in GOM
 
-length(which(dat$rel_poly > 77 & dat$ret_poly > 77))/sum(d$V5)     # 0.8394142    = spawned in ATL, recruited in ATL
-length(which(dat$rel_poly <= 77 & dat$ret_poly > 77))/sum(d$V5)    # 0.01136878   = spawned in GOM, recruited in ATL
-length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77))/sum(d$V5)   # 0.4308186    = spawned in GOM, recruited in GOM
-length(which(dat$rel_poly > 77 & dat$ret_poly <= 77))/sum(d$V5)    # 0.0003637645 = spawned in ATL, recruited in GOM
-
-0.8394142/(0.8394142 + 0.01136878)  # = 0.9866373        98.66 % 
+aa <- length(which(dat$rel_poly > 77 & dat$ret_poly > 77));   aa    # 0.8394142    = spawned in ATL, recruited in ATL
+ga <- length(which(dat$rel_poly <= 77 & dat$ret_poly > 77));  ga    # 0.01136878   = spawned in GOM, recruited in ATL
+gg <- length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77)); gg   # 0.4308186    = spawned in GOM, recruited in GOM
+ag <- length(which(dat$rel_poly > 77 & dat$ret_poly <= 77));  ag    # 0.0003637645 = spawned in ATL, recruited in GOM
 
 rel <- tapply(d$V5, list(d$V6, d$reg), sum)
+rel
+
+gg / rel[2] * 100  # % Gulf-spawned eggs settling in Gulf
+ga / rel[2] * 100  # % Gulf-spawned eggs settling in Atl
+aa / rel[1] * 100  # % Atl-spawned eggs settling in Atl
+
+aa / (aa + ga)                        # of all recruits in Atlantic, what % came from Atl
+aa/ length(which(dat$ret_poly > 77))  # of all recruits in Atlantic, what % came from Atl
+
+0.8394142/(0.8394142 + 0.01136878)  # = 0.9866373        98.66 % 
 
 surv <- table(dat$ret_yr, dat$reg)
 
@@ -55,23 +76,20 @@ surv/rel
 
 barplot(table(dat$reg, dat$ret_yr), beside=T)
 
-table(dat$reg, dat$rel_poly)         # polygon 62 is first to have successful recruitment to S Atl
+table(dat$reg, dat$rel_poly)         # polygon 68 is first to have successful recruitment to S Atl
 
 (table(dat$reg) / nrow(dat)) * 100
 
-a <- table(dat$reg, dat$ret_yr)
-a
 
 ########################  END BASIC COMPARISONS  ###############################
 
 ########################  CHECK PARTICLE BEHAVIORS  ############################
 rm(list=ls())
-
 library(ncdf4)
 
 getwd()
 
-nc <- nc_open("traj_file_2.nc")
+nc <- nc_open("traj_file_05.nc")
 
 v1 <- nc$var[[1]]
 int <- ncvar_get(nc, v1)
@@ -112,8 +130,34 @@ table(dep[2,]<10)/ncol(dep)
 table(dep[2,]>10 & dep[2,]<20)/ncol(dep)
 table(dep[2,]>20 & dep[2,]<30)/ncol(dep)
 
-windows()
-matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="l")
+#windows()
+matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="l", 
+        xlab = "days after spawning", ylab = "depth of particle")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
+matplot(-dep, col="#FF00FF30", pch=19, type="l", 
+        xlab = "days after spawning", ylab = "depth of particle")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
+#  plot by code number 
+par(mfrow=c(4,1), mar = c(4,4,2,1), mgp=c(2.25,1,0))
+matplot(-dep[,which(cod == (0))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0),
+        xlab = "days after spawning", ylab = "depth of particle", main = "can still move")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
+matplot(-dep[,which(cod == (-1))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
+        xlab = "days after spawning", ylab = "depth of particle", main = "left area")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
+matplot(-dep[,which(cod == (-2))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
+        xlab = "days after spawning", ylab = "depth of particle", main = "close to land")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
+matplot(-dep[,which(cod == (-4))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0), 
+        xlab = "days after spawning", ylab = "depth of particle", main = "settled")
+axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+# end plot -------
+
 matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="p")
 
 plot(dens, -dep[2,], col="#FF00FF30")
@@ -134,27 +178,23 @@ max(dep[2,])
 ##########################  PLOT TRAJECTORIES  ###############################
 
 rm(list=ls())
-
 getwd()
 
-library(ncdf4)
-library(maps)
-
-##########  bathymetry  ##############
+##############################   bathymetry   ################################
 
 #save(x,y,z,cols, file="GEBCO_bathy.RData")
 load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/GEBCO_bathy.RData")        # stored GEBCO data and color scheme
 
-###############  plots by year  
+##############################  plots by year  ##############################
 yrs <- c(2008)
 
 par(mfrow=c(3,1), mex=0.6)
 
-maxlat <- rep(NA, 7)
+#maxlat <- rep(NA, 7)
 
 numlarv <- 500
 
-for (m in 1:1) {
+for (m in 4:4) {
   nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
@@ -177,10 +217,9 @@ nc_close(nc)
 #  maxlat[m] <- mean(la, na.rm=T)     }
 
 map('usa', xlim=c(-98, -76), ylim=c(24,35), col=1)
-#map('usa', xlim=c(-85.5, -75), ylim=c(23.85,35), col=0)
 #image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
 legend("topleft", paste(yrs[m]), cex=1.2, text.font=2, bty="n")
-  i <- which(cod == (-4))
+  i <- which(cod == (-2))
   k <- i[seq(1, length(i), length.out=numlarv*2)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FF00FF20") } 
   
@@ -219,13 +258,13 @@ lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, "#00000050", "#FF000050"), pc
 
 
 
-    
+##################################################################################    
 ### all trajectories on one map    
-map('usa', xlim=c(-84, -76), ylim=c(23.85,35), col=0)
+map('usa', xlim=c(-88, -76), ylim=c(23.85,35), col=0)
 image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
 
-for (m in 1:3) {
-  nam <- paste("traj_file_", m, ".nc", sep="")
+for (m in 2:9) {
+  nam <- paste("traj_file_0", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
   lon <- ncvar_get(nc, v2)
@@ -241,8 +280,8 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   cod[which(cod>10000)] <- NA    # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
 nc_close(nc)
 
-  i <- 1:length(cod)   #which(cod == (-4))
-  k <- i[seq(1, length(i), length.out=2000)]
+  i <- 1:length(cod)  # which(cod == (-4))   
+  k <- i[seq(1, length(i), length.out=400)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") }
   i <- which(cod == (-4))
   k <- i[seq(1, length(i), length.out=200)]  
@@ -260,6 +299,7 @@ nc_close(nc)
 legend("topleft", c("all trajectories", "trajectories of successful recruits", "release locations", "settlement locations of \nlarvae released from Atl"), 
  lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, 1, 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.0, bty="n")  
 
+##################################################################################
 
         # jun 12
  ### all trajectories on one map  -- full GoM   
@@ -271,8 +311,8 @@ mtext(side=3, line=1, "HYCOM 1/50 degree model -- 2008", font=2)
 #mtext(side=3, line=1, "SABGOM model -- 2004 - 2010", font=2)
 
 
-for (m in 1:3) {
-  nam <- paste("traj_file_", m, ".nc", sep="")
+for (m in 1:9) {
+  nam <- paste("traj_file_0", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
   lon <- ncvar_get(nc, v2)
@@ -289,10 +329,10 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
 nc_close(nc)
 
   i <- 1:length(cod)   #  which(cod == (-4))        # 
-  k <- i[seq(1, length(i), length.out=6000)]
+  k <- i[seq(1, length(i), length.out=400)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") } 
                             i <- which(cod == (-4))  
-                            k <- i[seq(1, length(i), length.out=6000)]
+                            k <- i[seq(1, length(i), length.out=200)]
   for (j in k) { #which(cod == (-4))  ) {
       lo <- lon[max(which(!is.na(lon[,j]))),j] - 360
       la <- lat[max(which(!is.na(lat[,j]))),j]
