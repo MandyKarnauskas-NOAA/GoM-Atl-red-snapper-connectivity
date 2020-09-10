@@ -23,6 +23,10 @@ library(maps)
 
 # load data --------------------------------------------------
 source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plotting.r")                                                                                                  
+
+#load("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_mapping_with_platforms_FINAL_wALK/FINAL_MAPPING_RESULTS.RData")        #  Fwith_platform is index to be used
+#plotonmap(mat$Ftotal, mat$statlon, mat$statlat, 15, 0.9, addplus=T); text(-90.5,26.25, "index of fecundity")
+  
 load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_MAPPING_RESULTS_ext.RData")        #  Fwith_platform is index to be used
 head(mat)
 
@@ -234,7 +238,7 @@ head(rel1)
 m <- rel1       # 'm' is list of release sites with columns: polygon, lon, lat, number of releases
 head(m)
 
-m$N <- m$N * 10  #  - SCALE AS NECESSARY  - scaling up dramatically so that we can reduce to achieve desired ratio with Atl       
+m$N <- m$N * 100  #  - SCALE AS NECESSARY  - scaling up dramatically so that we can reduce to achieve desired ratio with Atl       
 mean(m$N); min(m$N); max(m$N)
 which(m$N==0)
 

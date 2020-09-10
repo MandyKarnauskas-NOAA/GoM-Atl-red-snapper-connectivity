@@ -201,12 +201,12 @@ lis <- 2013               # loop over years in matrix below  2008-2009 for 1/12 
 m <- rel[-c(5,6)]       # 'm' is list of release sites with columns: polygon, lon, lat, number of releases
 head(m)
 
-x <- m$N / 4000
+x <- m$N / 100
 x1 <- round(x)
 tapply(x, (x1 == 0), sum)/sum(x)          # what percentage of particles get lost by rounding?
 mean(x1); min(x1); max(x1)
 
-m$N <-round(m$N / 5000)
+m$N <-round(m$N / 100)
 mean(m$N); min(m$N); max(m$N)
 table(m$N==0)
 
@@ -255,7 +255,7 @@ diff(table(matfin$V6))
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
 
-f <- which(matfin$V6==2013 & matfin$V7 == 5 & matfin$V8 == 16); length(f)       # off peak spawning 
+f <- which(matfin$V6==2013 & matfin$V7 == 5 & matfin$V8 == 22); length(f)       # off peak spawning 
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
 f <- which(matfin$V6==2013 & matfin$V7 == 6 & matfin$V8 == 21); length(f)      # peak spawning

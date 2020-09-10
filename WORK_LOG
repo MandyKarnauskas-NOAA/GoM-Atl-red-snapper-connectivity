@@ -4,6 +4,9 @@
 - fixed issue with spawning dates identified in Beaufort meeting.  There was error with date specification; resolved in RSmap_SA codes.  
 - RESOLVED issue to line up start dates -- based on 95% cutoff the Atl start date is May 22 and GoM start date is May 16 (every 6 days) until Sep 25 for both regions
 - FINALIZED RS_CMS_releasefile_ATL.r and RS_CMS_releasefile_GOM.r files
+- FINALIZED scaling code (scale_releases_1to1.r)
+
+- scaledGOMATLrel2013.txt" is single year release file ready for testing!
 
 ****************************************************************************************************************************************
 3 Mar 2020
