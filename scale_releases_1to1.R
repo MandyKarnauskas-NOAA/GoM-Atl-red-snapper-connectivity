@@ -139,10 +139,21 @@ dim(scaledfin)/7
 dim(scaled)
 sum(scaledfin$V5)
 
+table(scaledfin$V1)
+table(scaledfin$V2)
+table(scaledfin$V3)
+table(scaledfin$V4)
+table(scaledfin$V5)
+table(scaledfin$V6)
+table(scaledfin$V7)
+table(scaledfin$V8)
+table(scaledfin$V9)
+
+scaledfin$V6 <- 2010
 
 # save output -------------------------------------------
 
-write.table(scaledfin, file="scaledGOMATLrel2013.txt", sep="\t", col.names=F, row.names=F)
+write.table(scaledfin, file="scaledGOMATLrel2010.txt", sep="\t", col.names=F, row.names=F)
 
 
 # plot release file by date --------------------------------------
