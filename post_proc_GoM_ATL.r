@@ -9,9 +9,9 @@ library(ncdf4)
 library(sp)
 ######################################################
 
-setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/SABGOM1")
-setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TESTRUN")
-setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TEST_NOBUOY")
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/Mercator_red")
+#setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TESTRUN")
+#setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TEST_NOBUOY")
 
 ##############  concatenate files  ###################                                   
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -36,9 +36,9 @@ dat$rel_reg[which(dat$rel_poly > 77)] <- "ATL"
 
 ###########################  specify release file  #############################
 
-d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
-d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20040617.txt")
-
+d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20132017.txt")
+#d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
+#d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20040617.txt")
 
 d$reg <- "GOM"
 d$reg[which(d$V1 > 77)] <- "ATL"
@@ -66,7 +66,7 @@ aa / rel[1] * 100  # % Atl-spawned eggs settling in Atl
 aa / (aa + ga)                        # of all recruits in Atlantic, what % came from Atl
 aa/ length(which(dat$ret_poly > 77))  # of all recruits in Atlantic, what % came from Atl
 
-0.8394142/(0.8394142 + 0.01136878)  # = 0.9866373        98.66 % 
+#0.8394142/(0.8394142 + 0.01136878)  # = 0.9866373        98.66 % 
 
 surv <- table(dat$ret_yr, dat$reg)
 
@@ -89,7 +89,7 @@ library(ncdf4)
 
 getwd()
 
-nc <- nc_open("traj_file_05.nc")
+nc <- nc_open("traj_file_3.nc")
 
 v1 <- nc$var[[1]]
 int <- ncvar_get(nc, v1)
@@ -121,7 +121,11 @@ dep[2,which(cod==(-1))]
 hist(dep[2,which(cod==(-1))])
 hist(dep[2,])
 
-windows()
+bad <- data.frame(cbind(lon[1, which(cod == (-2))]-360, lat[1, which(cod == (-2))]))
+bad$V3 <- paste(bad[,1], bad[,2])
+matrix(unique(bad$V3))
+
+dev.off()
 par(mfrow=c(6,5), mex=0.6)
 for (i in 1:30) { hist(dep[i,], breaks=seq(0,100,5)) }
 
@@ -130,32 +134,33 @@ table(dep[2,]<10)/ncol(dep)
 table(dep[2,]>10 & dep[2,]<20)/ncol(dep)
 table(dep[2,]>20 & dep[2,]<30)/ncol(dep)
 
-#windows()
-matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="l", 
+dev.off()
+matplot(-dep[,seq(1, ncol(dep), length.out=500)], col="#FF00FF30", pch=19, type="l", 
         xlab = "days after spawning", ylab = "depth of particle")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
-matplot(-dep, col="#FF00FF30", pch=19, type="l", 
-        xlab = "days after spawning", ylab = "depth of particle")
-axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+#matplot(-dep, col="#FF00FF30", pch=19, type="l", 
+#        xlab = "days after spawning", ylab = "depth of particle")
+#axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
 #  plot by code number 
 par(mfrow=c(4,1), mar = c(4,4,2,1), mgp=c(2.25,1,0))
-matplot(-dep[,which(cod == (0))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0),
-        xlab = "days after spawning", ylab = "depth of particle", main = "can still move")
+#matplot(-dep[,which(cod == (0))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0),
+#        xlab = "days after spawning", ylab = "depth of particle", main = "can still move")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
-matplot(-dep[,which(cod == (-1))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
-        xlab = "days after spawning", ylab = "depth of particle", main = "left area")
+#matplot(-dep[,which(cod == (-1))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
+#        xlab = "days after spawning", ylab = "depth of particle", main = "left area")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
-matplot(-dep[,which(cod == (-2))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
-        xlab = "days after spawning", ylab = "depth of particle", main = "close to land")
+#matplot(-dep[,which(cod == (-2))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
+#        xlab = "days after spawning", ylab = "depth of particle", main = "close to land")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
-matplot(-dep[,which(cod == (-4))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0), 
-        xlab = "days after spawning", ylab = "depth of particle", main = "settled")
+#matplot(-dep[,which(cod == (-4))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0), 
+#        xlab = "days after spawning", ylab = "depth of particle", main = "settled")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+
 # end plot -------
 
 matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="p")
@@ -186,28 +191,32 @@ getwd()
 load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/GEBCO_bathy.RData")        # stored GEBCO data and color scheme
 
 ##############################  plots by year  ##############################
-yrs <- c(2008)
 
-par(mfrow=c(3,1), mex=0.6)
+lon <- c()
+lat <- c()
+dep <- c()
+cod <- c()
 
-#maxlat <- rep(NA, 7)
+numlarv <- 1000
 
-numlarv <- 500
-
-for (m in 4:4) {
+for (m in 1:5) {
   nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
-  lon <- ncvar_get(nc, v2)
-  lon[which(lon>10000)] <- NA
+  lon1 <- ncvar_get(nc, v2)
+  lon1[which(lon1>10000)] <- NA
   v3 <- nc$var[[3]]
-  lat <- ncvar_get(nc, v3)
-  lat[which(lat>10000)] <- NA
+  lat1 <- ncvar_get(nc, v3)
+  lat1[which(lat1>10000)] <- NA
   v4 <- nc$var[[4]]
-  dep <- ncvar_get(nc, v4)
-  dep[which(dep>10000)] <- NA
+  dep1 <- ncvar_get(nc, v4)
+  dep1[which(dep1>10000)] <- NA
   v6 <- nc$var[[6]]
-  cod <- ncvar_get(nc, v6)  # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
+  cod1 <- ncvar_get(nc, v6)  # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
+  lon <- cbind(lon, lon1)
+  lat <- cbind(lat, lat1)
+  dep <- cbind(dep, dep1)
+  cod <- c(cod, cod1)
 nc_close(nc)
 }
 
@@ -216,55 +225,78 @@ nc_close(nc)
 #      for (j in i) {   la[j] <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]  } 
 #  maxlat[m] <- mean(la, na.rm=T)     }
 
-map('usa', xlim=c(-98, -76), ylim=c(24,35), col=1)
+dev.off()
+
+par(mfrow = c(2, 2), mex = 0.8, mgp = c(1,1,0))
+map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
+axis(1); axis(2); box(); mtext(side = 3, line = 1, "too close to land")
 #image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
-legend("topleft", paste(yrs[m]), cex=1.2, text.font=2, bty="n")
   i <- which(cod == (-2))
   k <- i[seq(1, length(i), length.out=numlarv*2)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FF00FF20") } 
+  points(lon[1, which(cod == (-2))]-360, lat[1,  which(cod == (-2))], col = "#FF000020")
   
-  
-  
-  i <- which(cod == (-4))
-  k <- i[seq(1, length(i), length.out=numlarv)]  
-    for (j in k) {
-      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
-          lines(lon[,j]-360, lat[,j], col="#00000040")
-          points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
-          if (lon[1,j]-360 < (-81.7))  {  points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  else { 
-          points(lo, la, col="#FF000050", pch=19, cex=1)  }
-         }      
-         }
-#  i <- which(cod == (-4))    
-#    for (j in i) {
-#      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-#      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
-#        if (lo > (-81.5))  {
-#          lines(lon[,j]-360, lat[,j], col="#00000010")
-#          points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
-#          points(lo, la, col="#FF000070", pch=19, cex=1.2)
-#       }  }
-#    }
-plot(1,1, axes=F, col=0, xlab="", ylab="")
-#legend("center", c("all trajectories", "trajectories of successful \nrecruits to S ATL", "release locations of \nsuccessful S ATL recruits", "settlement locations \nof successful recruits"), 
-#lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, 1, 2), pch=c(-1, -1, 19, 19), cex=1.2, y.intersp=1.75, bty="n")  
+#  -1 left area
+map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1,)
+axis(1); axis(2); box(); mtext(side = 3, line = 1, "left area") 
+i <- which(cod == (-1))
+k <- i[seq(1, length(i), length.out=numlarv)]  
+for (j in k) {
+  points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
+  lines(lon[,j]-360, lat[,j], col="#FF00FF20") 
+}      
 
-#legend("center", c("all trajectories", "trajectories of \nsuccessful recruits", "release locations", "settlement locations of \nlarvae released from GoM", "settlement locations of \nlarvae released from Atl"), 
-#lty=c(1,1,0,0,0), lwd=c(2,2,0,0,0), col=c("yellow", 1, "#00000050", "#00FF0090", "#FF000050"), pch=c(-1, -1, 19, 19, 19), cex=1.2, y.intersp=1.75, bty="n", pt.cex=2)  
+# 0 can still move
+map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1)
+axis(1); axis(2); box(); mtext(side = 3, line = 1, "can still move") 
+i <- which(cod == (0))
+k <- i[seq(1, length(i), length.out=numlarv)]  
+for (j in k) {
+  lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
+  la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
+  points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
+  lines(lon[,j]-360, lat[,j], col="#FF00FF20") 
+  if (lon[1,j]-360 < (-81.7))  {  points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  else { 
+    points(lo, la, col="#FF000050", pch=19, cex=1)  }
+}      
 
-legend("center", c("all trajectories", "trajectories of \nsuccessful recruits", "release locations", "settlement locations of \nlarvae released from Atl"), 
-lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, "#00000050", "#FF000050"), pch=c(-1, -1, 19, 19), cex=1.2, y.intersp=1.75, bty="n", pt.cex=2)  
+# -4 settled
+map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1)
+axis(1); axis(2); box(); mtext(side = 3, line = 1, "settled") 
+i <- which(cod == (-4))
+k <- i[seq(1, length(i), length.out=numlarv)]  
+for (j in k) {
+  lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
+  la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
+  points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
+  lines(lon[,j]-360, lat[,j], col="#FF00FF20") 
+  if (lon[1,j]-360 < (-81.7))  {  points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  else { 
+    points(lo, la, col="#FF000050", pch=19, cex=1)  }
+}      
 
+# all particles spawned in Gulf that settled in Atl
+dev.off()
+map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1)
+axis(1); axis(2); box(); mtext(side = 3, line = 1, "all GoM particles to Atl") 
+k <- which(cod == (-4))
+#k <- i[seq(1, length(i), length.out=numlarv)]  
+for (j in k) {
+  lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
+  la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
+  if (lon[1,j]-360 < (-81.7) & lo > (-81.7))  { 
+    points(lon[1,j]-360, lat[1,j], col="#00000050", pch=19, cex=1)
+    lines(lon[,j]-360, lat[,j], col="#FF00FF20") 
+    points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  
+}      
 
 
 ##################################################################################    
 ### all trajectories on one map    
-map('usa', xlim=c(-88, -76), ylim=c(23.85,35), col=0)
-image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
+map('usa', xlim=c(-88, -76), ylim=c(23.85,35), col=1)
+#image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
 
-for (m in 2:9) {
-  nam <- paste("traj_file_0", m, ".nc", sep="")
+for (m in 1:5) {
+  nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
   lon <- ncvar_get(nc, v2)
@@ -281,7 +313,7 @@ nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
 nc_close(nc)
 
   i <- 1:length(cod)  # which(cod == (-4))   
-  k <- i[seq(1, length(i), length.out=400)]
+  k <- i[seq(1, length(i), length.out = 300)]
   for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FFFF0010") }
   i <- which(cod == (-4))
   k <- i[seq(1, length(i), length.out=200)]  
@@ -294,10 +326,10 @@ nc_close(nc)
           points(lo, la, col="#FF000050", pch=19, cex=1.2)  }
          }
     }
-#legend("topleft", c("all trajectories", "trajectories of successful recruits", "release locations", "settlement locations of \nlarvae released from GoM", "settlement locations of \nlarvae released from Atl"), 
-# lty=c(1,1,0,0,0), lwd=c(2,2,0,0,0), col=c("yellow", 1, 1, 3, 2), pch=c(-1, -1, 19, 19, 19), cex=1.2, y.intersp=1.5, bty="n")  
-legend("topleft", c("all trajectories", "trajectories of successful recruits", "release locations", "settlement locations of \nlarvae released from Atl"), 
- lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, 1, 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.0, bty="n")  
+legend("topleft", c("all trajectories", "trajectories of successful recruits", "release locations", "settlement locations of \nlarvae released from GoM", "settlement locations of \nlarvae released from Atl"), 
+ lty=c(1,1,0,0,0), lwd=c(2,2,0,0,0), col=c("yellow", 1, 1, 3, 2), pch=c(-1, -1, 19, 19, 19), cex=1.1, y.intersp=1.2, bty="n")  
+#legend("topleft", c("all trajectories", "trajectories of successful recruits", "release locations", "settlement locations of \nlarvae released from Atl"), 
+# lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, 1, 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.0, bty="n")  
 
 ##################################################################################
 
@@ -311,8 +343,8 @@ mtext(side=3, line=1, "HYCOM 1/50 degree model -- 2008", font=2)
 #mtext(side=3, line=1, "SABGOM model -- 2004 - 2010", font=2)
 
 
-for (m in 1:9) {
-  nam <- paste("traj_file_0", m, ".nc", sep="")
+for (m in 1:1) {
+  nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
   lon <- ncvar_get(nc, v2)
@@ -346,23 +378,6 @@ legend("topleft", c("all larval trajectories", "trajectories of larvae successfu
  lty=c(1,1,0,0), lwd=c(2,2,0,0), col=c("yellow", 1, "green", 2), pch=c(-1, -1, 19, 19), cex=1.0, y.intersp=1.2, bty="n")  
 
 
-
-#########################
-
-map('usa', xlim=c(-83, -76), ylim=c(25,36), col=0)
-image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
-i <- which(cod == (-4))
-k <- i[seq(1, length(i), length.out=500)]
-     for (j in k) {
-      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
-          lines(lon[,j]-360, lat[,j], col="#00000010")
-          points(lon[1,j]-360, lat[1,j], col="#00000010", pch=19, cex=0.5)
-          points(lo, la, col="#FF000070", pch=19, cex=0.5)
-       }  
- 
-
- 
 ######################   CONNECTIVITY MATRIX   ##########################
 
 rm(list=ls())
@@ -465,30 +480,17 @@ colnames(con) <- c("source","sink","yr","mon","day","tim","ret_dep","rel_yr","re
 
 ############## list of polygon names
 pollis <- 1:max(d$pol)
-#########  plot layout
+#########  plot layout -- all years
 
 nf <- layout(matrix(c(1:2), 2, 1), c(10,10), c(10, 2))
 layout.show(nf)
 
-#nf <- layout(matrix(c(1:4, 1, 5:7, 1, 8, 9, 9, rep(10,4)), 4, 4, byrow=TRUE), c(1,rep(7,3)), c(7,7,7,1.5))
-#layout.show(nf)
-
-#nf <- layout(matrix(c(1:5, 14, 1, 6:9, 14, 1, 10:13, 14, 1, rep(15,5)), 4, 6, byrow=TRUE), c(1,rep(7,4), 3), c(7,7,7,1.5))
-#layout.show(nf)
-
-####  global y label
-#par(mar=c(0,0,0,0))
-#plot.new()
-#mtext(side=2, line=-1.5, "Source Node", font=2)
-#### plot connectivity matrices by year
 par(mar=c(3,3,3,2), xpd=F)
 resmat <- matrix(NA, nrow=13, ncol=5)
 limit <- length(pollis)
 
-#for (k in 2004:2010)  {
-#  con1 <- con[which(con$yr==k),]
-#  con1 <- con[which(con$yr>=2009),]
-   par(mar=c(5,5,3,2), xpd=F); con1 <- con                     # to look at all years together
+par(mar=c(5,5,3,2), xpd=F)
+con1 <- con                     # to look at all years together
   settle <- matrix(NA, length(pollis), length(pollis))
 for (i in 1:length(pollis))     {
     a <- which(con1$source==pollis[i])
@@ -498,11 +500,8 @@ for (i in 1:length(pollis))     {
 settle <- t(settle)
 nn <- 300
 cl = jet.colors(nn)
-#image(pollis[1:limit], pollis[1:limit], log((settle[1:limit,1:limit]+1)/(max(settle+2))), col=cl, axes=F,  xlab="", ylab="", main=k,
-image(pollis[1:limit], pollis[1:limit], log(settle[1:limit,1:limit]+1), col=cl, axes=F,  xlab="", ylab="", 
-main="GoM - Atl connectivity HYCOM 1/50 deg model - 2008")
-#, xlim=c(57, 96), ylim=c(57,96)
-#, main="GoM - Atl SABGOM connectivity 2004 - 2010")
+image(pollis[42:limit], pollis[42:limit], log(settle[42:limit,42:limit]+1), col=cl, axes=F,  xlab="", ylab="", 
+main="GoM - Atl connectivity -- Mercator model")
 
 axis(1, at=tklocs, lab=rep("", 6))
 axis(2, at=tklocs, lab=rep("", 6))
@@ -514,28 +513,6 @@ abline(v=tklocs[2], lty=1); abline(h=tklocs[2], lty=1)
 
 mtext(side=2, line=3.5, "Source Node", font=2)
 mtext(side=1, line=3.5, "Receiving Node", font=2)
-
-#  text(79, 95, "N to S", font=2, col="white")
-#  text(94, 78, "S to N", font=2, col="white")
-
-#  text(limit-8,57, "GOM to ATL", font=2, col="white")
-#  text(limit-8,limit-2, "ATL to ATL", font=2, col="white")
-#  text(64,57, "GOM to GOM", font=2, col="white")
-#  text(64,limit-2, "ATL to GOM", font=2, col="white")
-  
-#  text(limit-10,5, "GOM to ATL", font=2, col="white")
-#  text(limit-10,limit-5, "ATL to ATL", font=2, col="white")
-#  text(15,5, "GOM to GOM", font=2, col="white")
-#  text(15,limit-5, "ATL to GOM", font=2, col="white")
-
-# mtext(side=1, line=3.75, "Receiving node                ", font=2)
-# mtext(side=2, line=3.75, "Source node                ", font=2)
-
-#  resmat[k-2002,1] <- k
-#  resmat[k-2002,2] <- sum(sum(settle[1:max(egom),1:max(egom)]))
-#  resmat[k-2002,3] <- sum(sum(settle[1:max(egom),min(wfl):max(nc)]))
-#  resmat[k-2002,4] <- sum(sum(settle[min(wfl):max(nc),1:max(egom)]))
-#  resmat[k-2002,5] <- sum(sum(settle[min(wfl):max(nc),min(wfl):max(nc)]))   }
 
 ####  color bar plot
 par(mar=c(0,2,0,0))   
@@ -550,11 +527,70 @@ re <- lm(bra[1:(length(bra)-1)]~levs)
 poss <- (log(laa) - re$coef[1])/re$coef[2]
 text(poss, 1.09, laa, pos=4, cex=1.2)
 text(0.5,1.12, cex=1.2, "number of successful recruits", pos=3)
-#legend("bottom", "self-recruitment", lwd=1, lty=2, bty="n", cex=1.1)
 
+
+#########  plot layout -- individual years
+
+nf <- layout(matrix(c(1:4, 1, 5:7, rep(8,4)), 3, 4, byrow=TRUE), c(1,rep(7,3)), c(7,7,1.5))
+layout.show(nf)
+
+#nf <- layout(matrix(c(1:4, 1, 5:7, 1, 8, 9, 9, rep(10,4)), 4, 4, byrow=TRUE), c(1,rep(7,3)), c(7,7,7,1.5))
+#layout.show(nf)
+#nf <- layout(matrix(c(1:5, 14, 1, 6:9, 14, 1, 10:13, 14, 1, rep(15,5)), 4, 6, byrow=TRUE), c(1,rep(7,4), 3), c(7,7,7,1.5))
+#layout.show(nf)
+
+####  global y label
+par(mar=c(0,0,0,0))
+plot.new()
+mtext(side=2, line=-5, "Source Node", font=2)
+
+#### plot connectivity matrices by year
+par(mar=c(3,3,3,2)-2, xpd=F)
+resmat <- matrix(NA, nrow=13, ncol=5)
+limit <- length(pollis)
+
+for (k in 2013:2017)  {
+  con1 <- con[which(con$yr == k),]
+
+par(mar=c(5,5,3,2), xpd=F); con1 <- con                     # to look at all years together
+settle <- matrix(NA, length(pollis), length(pollis))
+for (i in 1:length(pollis))     {
+  a <- which(con1$source==pollis[i])
+  if(length(a)>0) {
+    for (j in 1:length(pollis)) {   settle[i,j] <- length(which(con1$sink[a]==j))    }
+  } else { settle[i,] <- 0  }  }
+settle <- t(settle)
+nn <- 300
+cl = jet.colors(nn)
+image(pollis[42:limit], pollis[42:limit], log(settle[42:limit,42:limit]+1), col=cl, axes=F,  xlab="", ylab="", 
+      main= paste("Mercator model --", k))
+
+axis(1, at=tklocs, lab=rep("", 6))
+axis(2, at=tklocs, lab=rep("", 6))
+axis(2, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
+axis(1, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
+box(); abline(0,1, lty=2)
+abline(v=tklocs[2], lty=1); abline(h=tklocs[2], lty=1)
+}
+
+####  color bar plot
+par(mar=c(0,2,0,0))   
+plot(c(1.05,1.18), c(-0.5,1.5),  axes=F, xlab="", ylab="", col="white")
+bra <- (seq(-0.5, ceiling(log(max(settle))), (ceiling(log(max(settle)))+0.5)/nn))
+i = seq(0,1,1/(nn-1))
+#rect(1.05, i, 1.1, 1, col = cl, lwd=0, border=cl)
+rect(1.10, i, 1.12, 1.3, col = cl, lwd=0, border=cl)
+laa <- c(1,10,100,1000)   # laa <- seq(0, 60000, 10000)
+levs <- (0+i[1:nn]+1/(nn*2))
+re <- lm(bra[1:(length(bra)-1)]~levs)
+poss <- (log(laa) - re$coef[1])/re$coef[2]
+text(1.12, poss, laa, pos=4, cex=1.2)
+text(1.12, -0.15, cex=1.2, "number of successful recruits", pos=3)
+#legend("bottom", "self-recruitment", lwd=1, lty=2, bty="n", cex=1.1)
 
 ###  global x label
 par(mar=c(0,0,0,0))
 plot.new()
-mtext(side=1, line=-1.5, "Receiving Node", font=2)
+mtext(side=1, line=-5, "Receiving Node", font=2)
 #
+

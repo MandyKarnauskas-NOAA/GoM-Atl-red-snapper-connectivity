@@ -11,6 +11,8 @@ rm(list=ls())
 if (!"maps" %in% installed.packages()) install.packages("maps", repos='http://cran.us.r-project.org')
 library(maps)
 
+source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/findMinDepth.R")
+
 ### Step 1: import independent maps and scale them to known ratios calculated above
 
 # load data ----------------------------------------------------------
@@ -96,11 +98,12 @@ if(-pos[w]<min(x)) { xx <- seq(0, max(x), pos[w]); xx <- xx[xx>min(x)] } else { 
 text(xloc[round((xx-a)/b*100+1)], y=23.2, xx, pos=2)
 mtext(side=3, line=1.5, "unscaled fecundity map", cex=1.3, font=2)
 
+
 # reduce number of particles ----------------------------------
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 dim(scaled)
 
-scaled$V5 <- round(scaled$V5/100)
+scaled$V5 <- round(scaled$V5/1000)
 
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 table(scaled$V5==0)
@@ -127,15 +130,26 @@ if(-pos[w]<min(x)) { xx <- seq(0, max(x), pos[w]); xx <- xx[xx>min(x)] } else { 
 text(xloc[round((xx-a)/b*100+1)], y=23.2, xx, pos=2)
 mtext(side=3, line=1.5, "scaled fecundity map", cex=1.3, font=2)
 
-scaledfin <- scaled
+#scaledfin <- scaled
 dim(scaled)
 
-#for (y in 2005:2010)  {
-#  scaled2 <- scaled
-#  scaled2$V6 <- y
-#  scaledfin <- rbind(scaledfin, scaled2)   }
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes")
 
-dim(scaledfin)/7
+d <- read.table("C:/Users/mandy.karnauskas/Desktop/bad.csv", sep = ",", header = F)
+d$V4 <- d$V3
+d$V3 <- paste0(round(d$V1, 4), "_", round(d$V2, 4))
+scaled$V10 <- paste0(round(scaled$V2, 4), "_", round(scaled$V3, 4))
+prob <- which(scaled$V10 %in% d$V3)
+prob2 <- which(scaled$V10 == d$V3[3])
+
+scaledfin <- c()
+
+for (y in 2013:2017)  {
+  scaled2 <- scaled
+  scaled2$V6 <- y
+  scaledfin <- rbind(scaledfin, scaled2)   }
+
+dim(scaledfin)/5
 dim(scaled)
 sum(scaledfin$V5)
 
@@ -149,11 +163,40 @@ table(scaledfin$V7)
 table(scaledfin$V8)
 table(scaledfin$V9)
 
-scaledfin$V6 <- 2010
+#scaledfin$V6 <- 2010
+
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/")
+
+nests <- c("nest_1_SABGOM.nc", "nest_2_SABGOM.nc", "nest_1_AtlMercator.nc", "nest_1_20080501000000_HYCOM150.nc")
+d2 <- findMinDepth(scaledfin$V2, scaledfin$V3, nests)
+plot(-d2, -scaledfin$V4)
+abline(1,1)
+table(scaledfin$V4 < d2)
+
+plot(-d2[1:100], type = "l")
+lines(-scaledfin$V4[1:100], col = 2)
+
+scaledfin$V4 <- round(d2 - 10)
+table(scaledfin$V4)
+scaledfin$V4[which(scaledfin$V4 > 50)] <- 50
+table(scaledfin$V4)
+
+table(scaledfin$V4[prob])
+scaledfin$V4[prob] <- scaledfin$V4[prob] - 10
+table(scaledfin$V4[prob])
+
+table(scaledfin$V4 < d2)
+
+table(scaledfin$V4[prob2])
+scaledfin$V4[prob2] <- scaledfin$V4[prob2] - 10
+table(scaledfin$V4[prob2])
+
+plot(-d2, -scaledfin$V4, pch = 19, cex = 2, col = "#FF000002")
+abline(1,1)
 
 # save output -------------------------------------------
 
-write.table(scaledfin, file="scaledGOMATLrel2010.txt", sep="\t", col.names=F, row.names=F)
+write.table(scaledfin, file="scaledGOMATLrel20132017.txt", sep="\t", col.names=F, row.names=F)
 
 
 # plot release file by date --------------------------------------
