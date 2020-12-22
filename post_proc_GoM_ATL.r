@@ -1,51 +1,59 @@
-
+ 
 rm(list=ls())
-######################################################
+
+# load libraries --------------------------------------
+
 if (!"ncdf4" %in% installed.packages()) install.packages("ncdf4", repos='http://cran.us.r-project.org')
 if (!"sp" %in% installed.packages()) install.packages("sp", repos='http://cran.us.r-project.org')
 if (!"maps" %in% installed.packages()) install.packages("maps", repos='http://cran.us.r-project.org')
 library(maps)
 library(ncdf4)
 library(sp)
-######################################################
 
-setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/Mercator_red")
-#setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TESTRUN")
-#setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINAL_RUNS/TEST_NOBUOY")
+# specify folder for processing ------------------------
 
-##############  concatenate files  ###################                                   
+model <- "Mercator"
+
+if (model == "Mercator") {
+  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/Mercator_red")  
+  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20132017.txt")
+  }
+if (model == "HYCOM") {
+  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/HYCOM-GLB-GOM-merge")  
+  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel2018.txt")
+}
+if (model == "SABGOM") {
+  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/old_code_depfix3")  
+  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
+}
+if (model == "Atl-HYCOM") {
+  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/MattHYCOM_red")  
+  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel200809.txt")
+}
+
+# concatenate connectivity files -------------------                                  
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
 dat <- read.table(filelist[1])
 filelist <- filelist[-1]
 for (i in filelist)  { newdat <- read.table(i); dat <- rbind(dat, newdat) }
 colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
-##########################################################
+
+# input polygon file -------------------------------
 
 co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
-map("state", ylim=c(24, 36), xlim=c(-100, -75))  # check
-for (i in 1:117)  {
-  f <- co[which(co$V3==i),]
-  polygon(f, col=i)  
-  text(mean(f$V1), mean(f$V2), mean(f$V3))}
 
 dat$reg <- "GOM"
 dat$reg[which(dat$ret_poly > 77)] <- "ATL"
-
 dat$rel_reg <- "GOM"
 dat$rel_reg[which(dat$rel_poly > 77)] <- "ATL"
 
-###########################  specify release file  #############################
-
-d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20132017.txt")
-#d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20042010.txt")
-#d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20040617.txt")
+# process release file ------------------------------
 
 d$reg <- "GOM"
 d$reg[which(d$V1 > 77)] <- "ATL"
 
-tapply(d$V5, d$reg, sum)     #   ATL    GOM 
-                            # 615783 677733
-                            
+tapply(d$V5, d$reg, sum)  
+                           
 length(which(dat$rel_poly > 77 & dat$ret_poly  > 77))    # 517049 = spawned in ATL, recruited in ATL
 length(which(dat$rel_poly <= 77 & dat$ret_poly > 77))    # 8080   = spawned in GOM, recruited in ATL
 length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77))   # 291605 = spawned in GOM, recruited in GOM
@@ -56,7 +64,7 @@ ga <- length(which(dat$rel_poly <= 77 & dat$ret_poly > 77));  ga    # 0.01136878
 gg <- length(which(dat$rel_poly <= 77 & dat$ret_poly <= 77)); gg   # 0.4308186    = spawned in GOM, recruited in GOM
 ag <- length(which(dat$rel_poly > 77 & dat$ret_poly <= 77));  ag    # 0.0003637645 = spawned in ATL, recruited in GOM
 
-rel <- tapply(d$V5, list(d$V6, d$reg), sum)
+rel <- tapply(d$V5, list(d$reg), sum)
 rel
 
 gg / rel[2] * 100  # % Gulf-spawned eggs settling in Gulf
@@ -66,30 +74,21 @@ aa / rel[1] * 100  # % Atl-spawned eggs settling in Atl
 aa / (aa + ga)                        # of all recruits in Atlantic, what % came from Atl
 aa/ length(which(dat$ret_poly > 77))  # of all recruits in Atlantic, what % came from Atl
 
-#0.8394142/(0.8394142 + 0.01136878)  # = 0.9866373        98.66 % 
-
-surv <- table(dat$ret_yr, dat$reg)
-
+surv <- table(dat$reg)
 surv/rel
 
 #dat <- dat[which(dat$rel_poly>64),]
 
 barplot(table(dat$reg, dat$ret_yr), beside=T)
-
 table(dat$reg, dat$rel_poly)         # polygon 68 is first to have successful recruitment to S Atl
-
 (table(dat$reg) / nrow(dat)) * 100
 
+# check particle behaviors ---------------------
 
-########################  END BASIC COMPARISONS  ###############################
-
-########################  CHECK PARTICLE BEHAVIORS  ############################
-rm(list=ls())
-library(ncdf4)
-
+rm(list = ls()[which(ls()!="model")])
 getwd()
 
-nc <- nc_open("traj_file_3.nc")
+nc <- nc_open("traj_file_1.nc")
 
 v1 <- nc$var[[1]]
 int <- ncvar_get(nc, v1)
@@ -107,17 +106,14 @@ v7 <- nc$var[[7]]
 dates <- ncvar_get(nc, v7)
 v8 <- nc$var[[8]]
 pol <- ncvar_get(nc, v8)
-v9 <- nc$var[[9]]
-dens <- ncvar_get(nc, v9)
-v10 <- nc$var[[10]]
-diam <- ncvar_get(nc, v10)
+#v9 <- nc$var[[9]]
+#dens <- ncvar_get(nc, v9)
+#v10 <- nc$var[[10]]
+#diam <- ncvar_get(nc, v10)
 nc_close(nc)
 
 # check!  should have only -4, -1, and 0
 table(cod)                                   # 0 can still move; -1 left area; -2 close to land; -3 dead; -4 settled; -5 no oceanographic data
-dates[which(cod==(-1))]
-lon[which(cod==(-1))]
-dep[2,which(cod==(-1))]
 hist(dep[2,which(cod==(-1))])
 hist(dep[2,])
 
@@ -144,45 +140,35 @@ axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 #axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
 #  plot by code number 
-par(mfrow=c(4,1), mar = c(4,4,2,1), mgp=c(2.25,1,0))
+#par(mfrow=c(4,1), mar = c(4,4,2,1), mgp=c(2.25,1,0))
 #matplot(-dep[,which(cod == (0))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0),
 #        xlab = "days after spawning", ylab = "depth of particle", main = "can still move")
-axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+#axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
 #matplot(-dep[,which(cod == (-1))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
 #        xlab = "days after spawning", ylab = "depth of particle", main = "left area")
-axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+#axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
-#matplot(-dep[,which(cod == (-2))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
-#        xlab = "days after spawning", ylab = "depth of particle", main = "close to land")
+matplot(-dep[,which(cod == (-2))], col="#FF00FF30", pch=19, type="l", ylim = c(-90, 0), 
+        xlab = "days after spawning", ylab = "depth of particle", main = "close to land")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
 #matplot(-dep[,which(cod == (-4))], col="#FF00FF05", pch=19, type="l", ylim = c(-90, 0), 
 #        xlab = "days after spawning", ylab = "depth of particle", main = "settled")
-axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
+#axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
 # end plot -------
 
 matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="p")
 
-plot(dens, -dep[2,], col="#FF00FF30")
-plot(diam, -dep[2,], col="#FF00FF30")
- 
-cc <- table(cut(dep[2,], breaks=c(-1,0.5, 10, 20, 30, 40)))
-cc
-cc/sum(cc) 
-barplot(cc)
- 
-min(dens)
-max(dens)
- 
-mean(dep[2,])
-min(dep[2,])
-max(dep[2,])
+#plot(dens, -dep[2,], col="#FF00FF30")
+#plot(diam, -dep[2,], col="#FF00FF30")
+#min(dens)
+#max(dens)
 
 ##########################  PLOT TRAJECTORIES  ###############################
 
-rm(list=ls())
+rm(list = ls()[which(ls()!="model")])
 getwd()
 
 ##############################   bathymetry   ################################
@@ -199,7 +185,7 @@ cod <- c()
 
 numlarv <- 1000
 
-for (m in 1:5) {
+for (m in 1:1) {
   nam <- paste("traj_file_", m, ".nc", sep="")
 nc <- nc_open(nam, write=FALSE, readunlim=TRUE, verbose=FALSE)
   v2 <- nc$var[[2]]
@@ -228,16 +214,22 @@ nc_close(nc)
 dev.off()
 
 par(mfrow = c(2, 2), mex = 0.8, mgp = c(1,1,0))
+
 map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
 axis(1); axis(2); box(); mtext(side = 3, line = 1, "too close to land")
 #image(x,y,z, col=cols, axes=T, xlab="", ylab="", add=T); box(); axis(1); axis(2, las=2)
   i <- which(cod == (-2))
-  k <- i[seq(1, length(i), length.out=numlarv*2)]
-  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FF00FF20") } 
-  points(lon[1, which(cod == (-2))]-360, lat[1,  which(cod == (-2))], col = "#FF000020")
+  k <- i #[seq(1, length(i), length.out=numlarv)]
+  for (j in k) {  lines(lon[,j]-360, lat[,j], col="#FF00FF20")
+    lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
+    la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
+    points(lo, la, col="#FF000010", pch=19, cex=1) 
+    } 
+  points(lon[1, i]-360, lat[1, i], col = "#00000020", pch = 19)
+  
   
 #  -1 left area
-map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1,)
+map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
 axis(1); axis(2); box(); mtext(side = 3, line = 1, "left area") 
 i <- which(cod == (-1))
 k <- i[seq(1, length(i), length.out=numlarv)]  
@@ -247,7 +239,7 @@ for (j in k) {
 }      
 
 # 0 can still move
-map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1)
+map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
 axis(1); axis(2); box(); mtext(side = 3, line = 1, "can still move") 
 i <- which(cod == (0))
 k <- i[seq(1, length(i), length.out=numlarv)]  
@@ -261,7 +253,7 @@ for (j in k) {
 }      
 
 # -4 settled
-map('usa', xlim=c(-90, -76), ylim=c(23,35), col=1)
+map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
 axis(1); axis(2); box(); mtext(side = 3, line = 1, "settled") 
 i <- which(cod == (-4))
 k <- i[seq(1, length(i), length.out=numlarv)]  
@@ -273,6 +265,8 @@ for (j in k) {
   if (lon[1,j]-360 < (-81.7))  {  points(lo, la, col="#00FF0090", pch=19, cex=1.2)  }  else { 
     points(lo, la, col="#FF000050", pch=19, cex=1)  }
 }      
+
+
 
 # all particles spawned in Gulf that settled in Atl
 dev.off()
@@ -380,7 +374,9 @@ legend("topleft", c("all larval trajectories", "trajectories of larvae successfu
 
 ######################   CONNECTIVITY MATRIX   ##########################
 
-rm(list=ls())
+rm(list = ls()[which(ls()!="model")])
+library(maps)
+library(matlab)
 getwd()
 
 ##############  concatenate files  ###################
@@ -389,12 +385,7 @@ dat <- read.table(filelist[1])
 filelist <- filelist[-1]
 for (i in filelist)  { newdat <- read.table(i); dat <- rbind(dat, newdat) }
 colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
-##########################################################
-
-# dat <- dat[which(dat$rel_poly>61),]
-
-library(maps)
-##############################################################################################
+#########################################################
 
 d <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
 names(d) <- c("lon", "lat", "pol")
@@ -402,96 +393,29 @@ names(d) <- c("lon", "lat", "pol")
 ##########  plot new grid cells  #########################
 
 pols <- unique(d$pol)
-are <- rep(NA, length(unique(d$pol)))
+tklocs <- c(89.5, 76.5, 95.5, 117.5, 106.5, 41.5) 
+lablocs <- c(21.0, 59.0, 83.0, 92.5, 101.0, 112.0) 
 
-plot(0, ylim=c(24, 36), xlim=c(-100, -75))  # check
-for (i in 1:117)  {
-  f <- d[which(d$pol==i),]
-  polygon(f, border=1)  }
- map('state', add=T)
- 
-text(tapply(d$lon, d$pol, mean), tapply(d$lat, d$pol, mean), unique(d$pol), cex=0.5)
-
-are[1:41] <- "W GoM"
-are[42:76] <- "E GoM"
-are[77:89] <- "E FL"
-are[90:95] <- "GA"
-are[96:106] <- "SC"
-are[107:117] <- "NC"
-
-are <- as.factor(are)
-tab <- table(pols, are)
-
-map('state', fill = 1, interior=F, col = gray(0.95), ylim=c(23,36), xlim=c(-99,-75))
-for (j in unique(d[,3]))  {
-  m <- d[which(d[,3]==j),]; polygon(m, lwd=3, col=as.numeric(are)[j]+1, border = 1, lwd=0.5)  }
-  axis(1); axis(2); box()
-for (j in unique(are)) {  text( mean(d$lon[d$pol %in% which(are==j)]),  mean(d$lat[d$pol %in% which(are==j)]), j, col=1) }
-abline(v=-89.1, lty=2); text(-87.5, 24, "longitude = -89.1")
-
-mids <- tapply(pols, are, mean)
-maxs <- tapply(pols, are, max)
-mins <- tapply(pols, are, min)
-
-tklocs <- maxs + 0.5
-lablocs <- sort((tklocs-mins-0.5)/2 + mins)       # used in plotting later
-
-efl <- which(tab[,1]==1)
-egom <- which(tab[,2]==1)
-ga <- which(tab[,3]==1)
-nc <- which(tab[,4]==1)
-sc <- which(tab[,5]==1)
-wgom <- which(tab[,6]==1)
-
-dat$state <- NA
-dat$state[which(dat$ret_poly<=max(egom))] <- "E GOM"
-dat$state[which(dat$ret_poly>=min(wgom) & dat$ret_poly<=max(wgom))] <- "W GOM"
-dat$state[which(dat$ret_poly>=min(efl) & dat$ret_poly<=max(efl))] <- "E FL"
-dat$state[which(dat$ret_poly>=min(ga) & dat$ret_poly<=max(ga))] <- "GA"
-dat$state[which(dat$ret_poly>=min(sc) & dat$ret_poly<=max(sc))] <- "SC"
-dat$state[which(dat$ret_poly>=min(nc))] <- "NC"
-
-
-##################################################################################
-
-#pdf("13JunAtl_conmatSummary.pdf")
 barplot(table(dat$ret_poly))
 barplot(table(dat$rel_poly))
 barplot(table(dat$ret_yr))
 barplot(table(dat$ret_mo))
 barplot(table(dat$ret_dep))
 barplot(table(dat$age))
-barplot(table(dat$state))
-#dev.off()
 
+# plot for all years together ----------------
 
-#########################################################################################
-#####################       connectivity matrix          ################################
-#########################################################################################
-# plot is for all years separately, see k loop to do all years together
-
-library(matlab)
-
-##########################
-
-## connectivity file
 con <- dat
-colnames(con) <- c("source","sink","yr","mon","day","tim","ret_dep","rel_yr","rel_mo","rel_d", "state")
-
-############## list of polygon names
-pollis <- 1:max(d$pol)
-#########  plot layout -- all years
-
-nf <- layout(matrix(c(1:2), 2, 1), c(10,10), c(10, 2))
-layout.show(nf)
-
-par(mar=c(3,3,3,2), xpd=F)
-resmat <- matrix(NA, nrow=13, ncol=5)
+colnames(con) <- c("source","sink","yr","mon","day","tim","ret_dep","rel_yr","rel_mo","rel_d")
+pollis <- 1:max(d$pol)    # list of polygon names
 limit <- length(pollis)
+
+nf <- layout(matrix(c(1:2), 2, 1), c(10,10), c(10, 2))   # plot layout -- all years
+layout.show(nf)
 
 par(mar=c(5,5,3,2), xpd=F)
 con1 <- con                     # to look at all years together
-  settle <- matrix(NA, length(pollis), length(pollis))
+settle <- matrix(NA, length(pollis), length(pollis))
 for (i in 1:length(pollis))     {
     a <- which(con1$source==pollis[i])
       if(length(a)>0) {
@@ -501,11 +425,10 @@ settle <- t(settle)
 nn <- 300
 cl = jet.colors(nn)
 image(pollis[42:limit], pollis[42:limit], log(settle[42:limit,42:limit]+1), col=cl, axes=F,  xlab="", ylab="", 
-main="GoM - Atl connectivity -- Mercator model")
+main= paste("GoM - Atl connectivity --", model))
 
 axis(1, at=tklocs, lab=rep("", 6))
 axis(2, at=tklocs, lab=rep("", 6))
-#lablocs[2] <- 74
 axis(2, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
 axis(1, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
 box(); abline(0,1, lty=2)
@@ -519,14 +442,13 @@ par(mar=c(0,2,0,0))
 plot(c(-0.5,1.5), c(1.05,1.18), axes=F, xlab="", ylab="", col="white")
 bra <- (seq(-0.5, ceiling(log(max(settle))), (ceiling(log(max(settle)))+0.5)/nn))
 i = seq(0,1,1/(nn-1))
-#rect(1.05, i, 1.1, 1, col = cl, lwd=0, border=cl)
 rect(i, 1.1, 1.04, 1.12, col = cl, lwd=0, border=cl)
-laa <- c(1,10,100,1000)   # laa <- seq(0, 60000, 10000)
+laa <- c(1,10,100)   # laa <- seq(0, 60000, 10000)
 levs <- (0+i[1:nn]+1/(nn*2))
 re <- lm(bra[1:(length(bra)-1)]~levs)
-poss <- (log(laa) - re$coef[1])/re$coef[2]
-text(poss, 1.09, laa, pos=4, cex=1.2)
+text((log(laa) - re$coef[1])/re$coef[2], 1.09, laa, pos=4, cex=1.2)
 text(0.5,1.12, cex=1.2, "number of successful recruits", pos=3)
+
 
 
 #########  plot layout -- individual years
@@ -552,7 +474,7 @@ limit <- length(pollis)
 for (k in 2013:2017)  {
   con1 <- con[which(con$yr == k),]
 
-par(mar=c(5,5,3,2), xpd=F); con1 <- con                     # to look at all years together
+par(mar=c(5,5,3,2), xpd=F)
 settle <- matrix(NA, length(pollis), length(pollis))
 for (i in 1:length(pollis))     {
   a <- which(con1$source==pollis[i])
@@ -579,13 +501,13 @@ plot(c(1.05,1.18), c(-0.5,1.5),  axes=F, xlab="", ylab="", col="white")
 bra <- (seq(-0.5, ceiling(log(max(settle))), (ceiling(log(max(settle)))+0.5)/nn))
 i = seq(0,1,1/(nn-1))
 #rect(1.05, i, 1.1, 1, col = cl, lwd=0, border=cl)
-rect(1.10, i, 1.12, 1.3, col = cl, lwd=0, border=cl)
+rect(1.11, i, 1.12, 1.3, col = cl, lwd=0, border=cl)
 laa <- c(1,10,100,1000)   # laa <- seq(0, 60000, 10000)
 levs <- (0+i[1:nn]+1/(nn*2))
 re <- lm(bra[1:(length(bra)-1)]~levs)
 poss <- (log(laa) - re$coef[1])/re$coef[2]
 text(1.12, poss, laa, pos=4, cex=1.2)
-text(1.12, -0.15, cex=1.2, "number of successful recruits", pos=3)
+text(1.115, -0.15, cex=1.2, "number of successful recruits", pos=3)
 #legend("bottom", "self-recruitment", lwd=1, lty=2, bty="n", cex=1.1)
 
 ###  global x label
@@ -594,3 +516,68 @@ plot.new()
 mtext(side=1, line=-5, "Receiving Node", font=2)
 #
 
+
+
+
+
+
+
+# old code 
+
+##########  plot new grid cells  #########################
+
+pols <- unique(d$pol)
+are <- rep(NA, length(unique(d$pol)))
+
+plot(0, ylim=c(24, 36), xlim=c(-100, -75))  # check
+for (i in 1:117)  {
+  f <- d[which(d$pol==i),]
+  polygon(f, border=1)  }
+map('state', add=T)
+
+text(tapply(d$lon, d$pol, mean), tapply(d$lat, d$pol, mean), unique(d$pol), cex=0.5)
+
+are[1:41] <- "W GoM"
+are[42:76] <- "E GoM"
+are[77:89] <- "E FL"
+are[90:95] <- "GA"
+are[96:106] <- "SC"
+are[107:117] <- "NC"
+
+are <- as.factor(are)
+tab <- table(pols, are)
+
+map('state', fill = 1, interior=F, col = gray(0.95), ylim=c(23,36), xlim=c(-99,-75))
+for (j in unique(d[,3]))  {
+  m <- d[which(d[,3]==j),]; polygon(m, lwd=3, col=as.numeric(are)[j]+1, border = 1, lwd=0.5)  }
+axis(1); axis(2); box()
+for (j in unique(are)) {  text( mean(d$lon[d$pol %in% which(are==j)]),  mean(d$lat[d$pol %in% which(are==j)]), j, col=1) }
+abline(v=-89.1, lty=2); text(-87.5, 24, "longitude = -89.1")
+
+mids <- tapply(pols, are, mean)
+maxs <- tapply(pols, are, max)
+mins <- tapply(pols, are, min)
+
+tklocs <- maxs + 0.5
+lablocs <- sort((tklocs-mins-0.5)/2 + mins)       # used in plotting later
+
+tklocs <- c(89.5, 76.5, 95.5, 117.5, 106.5, 41.5) 
+lablocs <- c(21.0, 59.0, 83.0, 92.5, 101.0, 112.0) 
+
+efl <- which(tab[,1]==1)
+egom <- which(tab[,2]==1)
+ga <- which(tab[,3]==1)
+nc <- which(tab[,4]==1)
+sc <- which(tab[,5]==1)
+wgom <- which(tab[,6]==1)
+
+dat$state <- NA
+dat$state[which(dat$ret_poly<=max(egom))] <- "E GOM"
+dat$state[which(dat$ret_poly>=min(wgom) & dat$ret_poly<=max(wgom))] <- "W GOM"
+dat$state[which(dat$ret_poly>=min(efl) & dat$ret_poly<=max(efl))] <- "E FL"
+dat$state[which(dat$ret_poly>=min(ga) & dat$ret_poly<=max(ga))] <- "GA"
+dat$state[which(dat$ret_poly>=min(sc) & dat$ret_poly<=max(sc))] <- "SC"
+dat$state[which(dat$ret_poly>=min(nc))] <- "NC"
+
+
+##################################################################################

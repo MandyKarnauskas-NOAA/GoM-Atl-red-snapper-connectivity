@@ -261,12 +261,63 @@ plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 f <- which(matfin$V6==2013 & matfin$V7 == 6 & matfin$V8 == 21); length(f)      # peak spawning
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
-save(matS, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")          # WRITE FILE TO TXT
+#save(matS, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")          # WRITE FILE TO TXT
 
 #write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
-#write.table(matN, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+write.table(matN, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 #write.table(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseMain_HYCOM150.txt", sep="\t", col.names=F, row.names=F)  
 
 ##################################   END    ####################################
 
+rm(list = ls())
+source("C:/Users/mandy.karnauskas/Desktop/RSmap_SA/plotSAmap.r") 
+source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/findMinDepth.R")
 
+setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/")
+
+d <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras.txt", sep="\t")
+plotSAmap(d$V5, d$V2, d$V3, cexnum=0.6, pchnum=15)
+
+nests <- c("nest_1_SABGOM_Hatteras.nc", "nest_1_AtlMercator.nc", "nest_1_20080501000000_HYCOM150.nc")
+
+d2 <- findMinDepth(d$V2, d$V3, nests)
+plot(-d2, -d$V4)
+abline(1,1)
+table(d$V4 < d2)
+table(d$V4)
+d$V4 <- round(d2 - 10)
+table(d$V4)
+d$V4[which(d$V4 > 50)] <- 50
+table(d$V4)
+
+plot(-d2, -d$V4, pch = 19, cex = 2, col = "#FF000002")
+abline(1,1)
+
+scaled <- d
+scaled$V5 <- round(scaled$V5/50)
+
+min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
+table(scaled$V5==0)
+scaled <- scaled[(scaled$V5>0),]
+
+dfin <- c()
+
+for (y in 2008:2009)  {
+  scaled$V6 <- y
+  dfin <- rbind(dfin, scaled)   }
+
+sum(dfin$V5)
+table(dfin$V6)
+
+plotSAmap(dfin$V5, dfin$V2, dfin$V3, cexnum=0.6, pchnum=15)
+
+#write.table(dfin, file="Hatteras_20082009.txt", sep="\t", col.names=F, row.names=F)
+
+table(dfin$V7)
+d3 <- dfin[which(dfin$V7 < 7),]
+
+sum(d3$V5)
+table(d3$V6)
+table(d3$V7)
+
+write.table(dfin, file="Hatteras_2017MayJun.txt", sep="\t", col.names=F, row.names=F)
