@@ -264,7 +264,7 @@ plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 #save(matS, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")          # WRITE FILE TO TXT
 
 #write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
-write.table(matN, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+#write.table(matN, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 #write.table(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseMain_HYCOM150.txt", sep="\t", col.names=F, row.names=F)  
 
 ##################################   END    ####################################
@@ -294,7 +294,7 @@ plot(-d2, -d$V4, pch = 19, cex = 2, col = "#FF000002")
 abline(1,1)
 
 scaled <- d
-scaled$V5 <- round(scaled$V5/50)
+scaled$V5 <- round(scaled$V5/10)
 
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 table(scaled$V5==0)
@@ -302,9 +302,9 @@ scaled <- scaled[(scaled$V5>0),]
 
 dfin <- c()
 
-for (y in 2008:2009)  {
+for (y in 2017)  {
   scaled$V6 <- y
-  dfin <- rbind(dfin, scaled)   }
+  dfin <- rbind(dfin, scaled) }
 
 sum(dfin$V5)
 table(dfin$V6)
@@ -320,4 +320,10 @@ sum(d3$V5)
 table(d3$V6)
 table(d3$V7)
 
-write.table(dfin, file="Hatteras_2017MayJun.txt", sep="\t", col.names=F, row.names=F)
+table(d3$V4)
+d3$V4[which(d3$V4 == 50)] <- 40
+table(d3$V4)
+
+write.table(d3, file="Hatteras_2017MayJun.txt", sep="\t", col.names=F, row.names=F)
+
+

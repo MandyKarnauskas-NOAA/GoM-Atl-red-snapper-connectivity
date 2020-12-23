@@ -103,7 +103,7 @@ mtext(side=3, line=1.5, "unscaled fecundity map", cex=1.3, font=2)
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 dim(scaled)
 
-scaled$V5 <- round(scaled$V5/200)
+scaled$V5 <- round(scaled$V5/1000)  # 200 for large, 1000 for small
 
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 table(scaled$V5==0)
@@ -144,7 +144,7 @@ prob2 <- which(scaled$V10 == d$V3[3])
 
 scaledfin <- c()
 
-for (y in 2015:2019)  {
+for (y in 2019)  {
   scaled2 <- scaled
   scaled2$V6 <- y
   scaledfin <- rbind(scaledfin, scaled2)   }
@@ -152,6 +152,10 @@ for (y in 2015:2019)  {
 dim(scaledfin)/5
 dim(scaled)
 sum(scaledfin$V5)
+head(scaledfin)
+
+scaledfin <- scaledfin[-10]
+head(scaledfin)
 
 table(scaledfin$V1)
 table(scaledfin$V2)
@@ -162,6 +166,7 @@ table(scaledfin$V6)
 table(scaledfin$V7)
 table(scaledfin$V8)
 table(scaledfin$V9)
+table(scaledfin$V10)
 
 setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/")
 
@@ -203,15 +208,18 @@ abline(1,1)
 
 tapply(scaledfin$V5, scaledfin$V1 > 77, sum)
 ga <- tapply(scaledfin$V5, scaledfin$V1 > 77, sum)
-ga[1] / ga[2]
+ga[1] / ga[2]   # 2.079171 for small; 2.10428 for large
 arearat
-sum(scaledfin$V5)
+sum(scaledfin$V5)   # 43404 per year for small; 224604 for large
 
-table(scaledfin$V6)
+table(scaledfin$V6) # 22938 per year for small; 34058 for large 
+head(scaledfin)
 
 # save output -------------------------------------------
 
-write.table(scaledfin, file="scaledGOMATLrel20152019_large.txt", sep="\t", col.names=F, row.names=F)
+write.table(scaledfin, file="scaledGOMATLrel2019.txt", sep="\t", col.names=F, row.names=F)
+
+# the end -----------------------
 
 
 # plot release file by date --------------------------------------
@@ -229,7 +237,7 @@ b <- max((x)-a)*1.03
 cols <- c(rainbow(30, start=0.82, end=0.99), rainbow(70, start=0.01, end=0.17))[100:1]
 
 for (i in 1:length(datelist))  {
-sc2 <- scaled[which(scaled$V6==2013 & scaled$V7==strsplit(datelist[i], "_")[[1]][1] & scaled$V8==strsplit(datelist[i], "_")[[1]][2]),]
+sc2 <- scaled[which(scaled$V6==2017 & scaled$V7==strsplit(datelist[i], "_")[[1]][1] & scaled$V8==strsplit(datelist[i], "_")[[1]][2]),]
 x1 <- sc2$V5 
 pind <- round((x1-a)/b*100+1); print(min(pind)); print(max(pind))
 map('state', fill = 1, interior=F, col = gray(0.95), ylim=c(23.0, 35), xlim=c(-89,-77))
@@ -239,7 +247,7 @@ xloc <- seq(-86, -78, length.out=100)
 for (j in 1:100) {   polygon(c(xloc[j], xloc[j+1],xloc[j+1], xloc[j]), c(23.5,23.5,24.0,24.0), col=cols[j], border=NA) }
 w <- 11 # w <- which.min(abs(((max(x)-min(x))/6) - pos))
 if(-pos[w]<min(x)) { xx <- seq(0, max(x), pos[w]); xx <- xx[xx>min(x)] } else {  xx <- c(seq(-pos[w], min(x), -pos[w]), seq(0, max(x), pos[w])) }
-text(xloc[round((xx-a)/b*100+1)], y=23.2, xx, pos=2)
+#text(xloc[round((xx-a)/b*100+1)], y=23.2, xx, pos=2)
 mtext(side=3, line=1.5, paste(month.abb[as.numeric(strsplit(datelist[i], "_")[[1]][1])], strsplit(datelist[i], "_")[[1]][2]), cex=1, font=2)
 }
 
