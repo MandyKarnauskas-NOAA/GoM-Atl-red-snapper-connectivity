@@ -12,24 +12,17 @@ library(sp)
 
 # specify folder for processing ------------------------
 
-model <- "Mercator"
+model <- "HYCOM"
+spp <- "mutton"
 
-if (model == "Mercator") {
-  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/Mercator_lane")  
-  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20132017.txt")
-  }
-if (model == "HYCOM") {
-  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/GOMHYCOM_large")  
-  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20152016.txt")
-}
-if (model == "SABGOM") {
-  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/SABGOM_large")  
-  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20062010_large.txt")
-}
-if (model == "Atl-HYCOM") {
-  setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/MattHYCOM_red")  
-  d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel200809.txt")
-}
+fold <- paste0("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/final_for_subsample/", model, "_", spp)
+setwd(fold) 
+
+if (model == "Mercator")  { d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20132017.txt") }
+if (model == "HYCOM")     { nd <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel2019.txt")     
+                                 d <- rbind(nd, nd, nd, nd, nd);   d$V6 <- sort(rep(2015:2019, nrow(nd))) }    
+if (model == "SABGOM")    { d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel20062010.txt") }
+if (model == "Atl-HYCOM") { d <- read.table("C://Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/scaledGOMATLrel200809.txt")   }
 
 # concatenate connectivity files -------------------                                  
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -38,16 +31,12 @@ filelist <- filelist[-1]
 for (i in filelist)  { newdat <- read.table(i); dat <- rbind(dat, newdat) }
 colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
 
-# input polygon file -------------------------------
-
-co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
-
 dat$ret_reg <- "GOM"
 dat$ret_reg[which(dat$ret_poly >= 77)] <- "ATL"
 dat$rel_reg <- "GOM"
 dat$rel_reg[which(dat$rel_poly >= 77)] <- "ATL"
 
-# process release file ------------------------------
+# process con file ------------------------------
 
 d$reg <- "GOM"
 d$reg[which(d$V1 >= 77)] <- "ATL"
@@ -72,6 +61,9 @@ aa / (aa + ga) * 100                       # of all recruits in Atlantic, what %
 ga / (aa + ga) * 100                      # of all recruits in Atlantic, what % came from Gulf
 
 ga/ length(which(dat$ret_poly >= 77))*100  # RECORD THIS NUMBER
+gomatl <- c(model, spp, ga/ length(which(dat$ret_poly >= 77))*100)
+
+write.table(matrix(gomatl, 1, 3), file = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/outputs.txt", append = T, col.names = F)
 
 surv <- table(dat$rel_reg)
 surv/rel
@@ -84,7 +76,7 @@ table(dat$rel_reg, dat$rel_poly)         # polygon 68 is first to have successfu
 
 # check particle behaviors ---------------------
 
-rm(list = ls()[which(ls()!="model")])
+rm(list = ls()[-which(ls() %in% c("model", "spp", "fold"))])
 getwd()
 folder <- "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/"  # folder for final plots
 
@@ -136,7 +128,7 @@ table(dep[2,]==0)/ncol(dep)
 #table(dep[2,]>20 & dep[2,]<30)/ncol(dep)
 
 dev.off()
-matplot(-dep[,seq(1, ncol(dep), length.out=500)], col="#FF00FF30", pch=19, type="l", 
+matplot(-dep[,seq(1, ncol(dep), length.out=100)], col="#FF00FF30", pch=19, type="l", 
         xlab = "days after spawning", ylab = "depth of particle")
 axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 
@@ -182,7 +174,11 @@ numlarv <- 500
 
 # 4-panel plot of particle states
 dev.off()
-par(mfrow = c(2, 2), mex = 0.8, mgp = c(1,1,0))
+
+png(filename = paste0(folder, "statusCheck-", model, "-", spp, ".png"), units="in", width=8, height=8, pointsize=12, res=72*20)
+
+par(mfrow = c(2, 2), mex = 0.5, mgp = c(1,1,0))
+
 map('usa', xlim=c(-90, -76), ylim=c(23, 35), col=1)
 axis(1); axis(2); box(); mtext(side = 3, line = 1, "too close to land")
   i <- which(cod == (-2))
@@ -230,13 +226,13 @@ for (j in k) {
 
 dev.off()
 
-png(filename = paste0(folder, "GoMtoAtl-", model, ".png"), units="in", width=4, height=6, pointsize=12, res=72*20)
+png(filename = paste0(folder, "GoMtoAtl-", model, "-", spp,".png"), units="in", width=4, height=6, pointsize=12, res=72*20)
 par(mar = c(3, 3, 2, 2))
 
 map('usa', xlim=c(-87.75, -75.25), ylim=c(23, 35.75), col=1)
 image(x[seq(1, 3360, 5)], y[seq(1, 3360, 5)], z[seq(1, 3360, 5), seq(1, 3360, 5)], col=cols, axes=T, xlab="", ylab="", add=T)
 axis(1); axis(2, las = 2); box()
-mtext(side = 3, line = 1, model, font = 2, cex = 1.2) 
+mtext(side = 3, line = 1, paste(model, "-", spp), font = 2, cex = 1.2) 
 
 k <- which(cod == (-4))
 k <- k[seq(1, length(k), 20)]  # change to 2 or 3
@@ -268,14 +264,14 @@ dev.off()
 
 # all trajectories on one map ---------------------------------
 
-png(filename = paste0(folder, "allTrajectories-", model, ".png"), units="in", width=6, height=9, pointsize=12, res=72*20)
+png(filename = paste0(folder, "allTrajectories-", model, "-", spp, ".png"), units="in", width=6, height=9, pointsize=12, res=72*20)
 
 par(mar = c(3, 3, 2, 2))
 
 map('usa', xlim=c(-87.75, -75.25), ylim=c(23, 35.75), col=1)
 image(x[seq(1, 3360, 5)], y[seq(1, 3360, 5)], z[seq(1, 3360, 5), seq(1, 3360, 5)], col=cols, axes=T, xlab="", ylab="", add=T)
 axis(1); axis(2, las = 2); box()
-mtext(side = 3, line = 1, model, font = 2, cex = 1.2) 
+mtext(side = 3, line = 1, paste(model, "-", spp), font = 2, cex = 1.2) 
 
 i <- 1:length(cod)   
 k <- i[seq(1, length(i), length.out = 100)] # change to 300
@@ -300,11 +296,9 @@ dev.off()
 
 ######################   CONNECTIVITY MATRIX   ##########################
 
-rm(list = ls()[which(ls()!="model")])
+rm(list = ls()[-which(ls() %in% c("model", "spp", "folder"))])
 library(maps)
 library(matlab)
-getwd()
-folder <- "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/"  # folder for final plots
 
 ##############  concatenate files  ###################
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -338,7 +332,7 @@ colnames(con) <- c("source","sink","yr","mon","day","tim","ret_dep","rel_yr","re
 pollis <- 1:max(d$pol)    # list of polygon names
 limit <- length(pollis)
 
-png(filename = paste0(folder, "conmatAllYears-", model, ".png"), units="in", width=5, height=5.7, pointsize=12, res=72*20)
+png(filename = paste0(folder, "conmatAllYears-", model, "-", spp, ".png"), units="in", width=5, height=5.7, pointsize=12, res=72*20)
 
 nf <- layout(matrix(c(1:2), 2, 1), c(10), c(10, 1.4))   # plot layout -- all years
 layout.show(nf)
@@ -355,7 +349,7 @@ settle <- t(settle)
 nn <- 300
 cl = jet.colors(nn)
 image(pollis[42:limit], pollis[42:limit], log(settle[42:limit,42:limit]+1), col=cl, axes=F, 
-      xlab="", ylab="", main= paste(model))
+      xlab="", ylab="", main = paste(model, "-", spp))
 
 axis(1, at=tklocs, lab=rep("", 6))
 axis(2, at=tklocs, lab=rep("", 6))
@@ -384,7 +378,7 @@ dev.off()
 
 #########  plot layout -- individual years
 
-png(filename = paste0(folder, "conmatByYear-", model, ".png"), units="in", width=13, height=3, pointsize=12, res=72*20)
+png(filename = paste0(folder, "conmatByYear-", model, "-", spp, ".png"), units="in", width=13, height=3, pointsize=12, res=72*20)
 
 nf <- layout(matrix(c(1:7, 0, rep(8, 5), 0), 2, 7, byrow=TRUE), c(2, rep(6,5), 3), c(6, 2))
 layout.show(nf)
@@ -417,7 +411,7 @@ settle <- t(settle)
 nn <- 300
 cl = jet.colors(nn)
 image(pollis[42:limit], pollis[42:limit], log(settle[42:limit,42:limit]+1), col=cl, axes=F,  xlab="", ylab="", 
-      main= paste(model, "-", k))
+      main= paste(model, "-", spp, "-", k))
 
 axis(1, at=tklocs, lab=rep("", 6))
 axis(2, at=tklocs, lab=rep("", 6))
@@ -456,12 +450,7 @@ dev.off()
 
 # CONNECTIVITY MATRIX - regional summary ---------------------
 
-rm(list = ls()[which(ls()!="model")])
-library(maps)
-library(matlab)
-getwd()
-folder <- "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/"  # folder for final plots
-
+rm(list = ls()[-which(ls() %in% c("model", "spp", "folder"))])
 
 ##############  concatenate files  ###################
 filelist <- list.files(path = ".", pattern="con_file")     #   find files
@@ -526,7 +515,7 @@ barplot(table(dat$age))
 
 # plot for all years together ----------------
 
-png(filename = paste0(folder, "conmatLoRes-", model, ".png"), units="in", width=6, height=6, pointsize=12, res=72*20)
+png(filename = paste0(folder, "conmatLoRes-", model, "-", spp, ".png"), units="in", width=6, height=6, pointsize=12, res=72*20)
 
 con <- dat
 colnames(con) <- c("rel", "ret", "yr","mon","day","tim","ret_dep","rel_yr","rel_mo","rel_d", "source", "sink")
@@ -546,7 +535,7 @@ settle <- t(settle)
 nn <- 300
 cl = jet.colors(nn)
 image(pollis, pollis[1:9], (settle[, 1:9]), col=cl, axes=F,  xlab="", ylab="", 
-      main= paste(model))
+      main = paste(model, "-", spp))
 
 axis(1, at=1:10, lab=labs, las = 2)
 axis(2, at=1:10, lab=labs, las = 2)
@@ -574,75 +563,3 @@ aa <- sum(as.vector(txt[6:10, 6:10]))
 ga / (ga + aa)  # should equal as above
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# old code 
-##########  plot new grid cells  #########################
-
-pols <- unique(d$pol)
-are <- rep(NA, length(unique(d$pol)))
-
-plot(0, ylim=c(24, 36), xlim=c(-100, -75))  # check
-for (i in 1:117)  {
-  f <- d[which(d$pol==i),]
-  polygon(f, border=1)  }
-map('state', add=T)
-
-text(tapply(d$lon, d$pol, mean), tapply(d$lat, d$pol, mean), unique(d$pol), cex=0.5)
-
-are[1:41] <- "W GoM"
-are[42:76] <- "E GoM"
-are[77:89] <- "E FL"
-are[90:95] <- "GA"
-are[96:106] <- "SC"
-are[107:117] <- "NC"
-
-are <- as.factor(are)
-tab <- table(pols, are)
-
-map('state', fill = 1, interior=F, col = gray(0.95), ylim=c(23,36), xlim=c(-99,-75))
-for (j in unique(d[,3]))  {
-  m <- d[which(d[,3]==j),]; polygon(m, lwd=3, col=as.numeric(are)[j]+1, border = 1, lwd=0.5)  }
-axis(1); axis(2); box()
-for (j in unique(are)) {  text( mean(d$lon[d$pol %in% which(are==j)]),  mean(d$lat[d$pol %in% which(are==j)]), j, col=1) }
-abline(v=-89.1, lty=2); text(-87.5, 24, "longitude = -89.1")
-
-mids <- tapply(pols, are, mean)
-maxs <- tapply(pols, are, max)
-mins <- tapply(pols, are, min)
-
-tklocs <- maxs + 0.5
-lablocs <- sort((tklocs-mins-0.5)/2 + mins)       # used in plotting later
-
-tklocs <- c(89.5, 76.5, 95.5, 117.5, 106.5, 41.5) 
-lablocs <- c(21.0, 59.0, 83.0, 92.5, 101.0, 112.0) 
-
-efl <- which(tab[,1]==1)
-egom <- which(tab[,2]==1)
-ga <- which(tab[,3]==1)
-nc <- which(tab[,4]==1)
-sc <- which(tab[,5]==1)
-wgom <- which(tab[,6]==1)
-
-dat$state <- NA
-dat$state[which(dat$ret_poly<=max(egom))] <- "E GOM"
-dat$state[which(dat$ret_poly>=min(wgom) & dat$ret_poly<=max(wgom))] <- "W GOM"
-dat$state[which(dat$ret_poly>=min(efl) & dat$ret_poly<=max(efl))] <- "E FL"
-dat$state[which(dat$ret_poly>=min(ga) & dat$ret_poly<=max(ga))] <- "GA"
-dat$state[which(dat$ret_poly>=min(sc) & dat$ret_poly<=max(sc))] <- "SC"
-dat$state[which(dat$ret_poly>=min(nc))] <- "NC"
-
-
-##################################################################################
