@@ -255,8 +255,10 @@ diff(table(matfin$V6))
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
 
-f <- which(matfin$V6==2013 & matfin$V7 == 5 & matfin$V8 == 22); length(f)       # off peak spawning 
-plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
+f <- which(matfin$V6==2013 & matfin$V7 == 5 & matfin$V8 == 23); length(f)       # off peak spawning 
+ff <- round(matfin$V5[f]/100)
+ff[ff == 0] <- 10000
+plotSAmap(ff, matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
 f <- which(matfin$V6==2013 & matfin$V7 == 6 & matfin$V8 == 21); length(f)      # peak spawning
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)

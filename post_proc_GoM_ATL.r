@@ -31,18 +31,34 @@ filelist <- filelist[-1]
 for (i in filelist)  { newdat <- read.table(i); dat <- rbind(dat, newdat) }
 colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
 
+
+################  NEW   ##################
+#dat <- dat[dat$ret_poly != 77, ]
+#dat <- dat[dat$ret_poly != 78, ]
+#dat <- dat[dat$ret_poly != 79, ]
+##########################################
+
+
 dat$ret_reg <- "GOM"
-dat$ret_reg[which(dat$ret_poly >= 77)] <- "ATL"
+dat$ret_reg[which(dat$ret_poly >= 76)] <- "ATL"
 dat$rel_reg <- "GOM"
-dat$rel_reg[which(dat$rel_poly >= 77)] <- "ATL"
+dat$rel_reg[which(dat$rel_poly >= 76)] <- "ATL"
+
+table(dat$rel_reg, dat$ret_reg)
+
+
+
+sum(d$V5)
+nrow(dat) / sum(d$V5)
 
 # process con file ------------------------------
 
 d$reg <- "GOM"
-d$reg[which(d$V1 >= 77)] <- "ATL"
+d$reg[which(d$V1 >= 76)] <- "ATL"
 tapply(d$V5, d$reg, sum)  
                            
 table(dat$rel_reg, dat$ret_reg)
+
 tab <- table(dat$rel_reg, dat$ret_reg)
 
 aa <- tab[1, 1];  aa    # 0.8394142    = spawned in ATL, recruited in ATL
@@ -63,7 +79,7 @@ ga / (aa + ga) * 100                      # of all recruits in Atlantic, what % 
 ga/ length(which(dat$ret_poly >= 77))*100  # RECORD THIS NUMBER
 gomatl <- c(model, spp, ga/ length(which(dat$ret_poly >= 77))*100)
 
-write.table(matrix(gomatl, 1, 3), file = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/outputs.txt", append = T, col.names = F)
+#write.table(matrix(gomatl, 1, 3), file = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/outputs.txt", append = T, col.names = F)
 
 surv <- table(dat$rel_reg)
 surv/rel
@@ -113,6 +129,13 @@ table(cod)           # 0 can still move; -1 left area; -2 close to land; -3 dead
 length(which(cod == (-2))) / length(cod) * 100   # percent of particles messed up
 hist(dep[2,which(cod==(-1))])
 hist(dep[2,])
+
+deplast <- rep(NA, ncol(dep))
+for (i in 1:ncol(dep)) {   deplast[i] <- dep[max(which(!is.na(dep[, i]))), i]   }
+hist(deplast[which(cod == (-4))])
+mean(deplast[which(cod == (-4))])
+deps <- deplast[which(cod == (-4))]
+table(deps >= 15 & deps <=45) / length(deps)
 
 bad <- data.frame(cbind(lon[1, which(cod == (-2))]-360, lat[1, which(cod == (-2))]))
 bad$V3 <- paste(bad[,1], bad[,2])

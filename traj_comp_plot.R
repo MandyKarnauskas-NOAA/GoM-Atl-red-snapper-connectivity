@@ -1,13 +1,16 @@
 
 rm(list = ls())
+library(ncdf4)
+library(splancs)
+library(maps)
 
 models <- c("SABGOM", "HYCOM", "Mercator")
 spps   <- c("lane", "mutton", "grey")
 s1 <- c("OVM 1", "OVM 2", "OVM 3")
 
-png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_traj.png", units="in", width=5.9, height=7.25, pointsize=12, res=72*20)
+png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_traj_poly76.png", units="in", width=5.9, height=7.5, pointsize=12, res=72*20)
 
-par(mfrow = c(3, 3), mar = c(1, 1, 0, 0), xpd = F, mex = 0.5)
+par(mfrow = c(3, 3), mar = c(2, 2, 0, 0), xpd = F, mex = 0.8)
 
 for (m in 1: 3)  { 
   for (s in 1:3)  {
@@ -47,31 +50,46 @@ for (m in 1: 3)  {
     
     load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/GEBCO_bathy_hires.RData")        # stored GEBCO data and color scheme
     
-    map('usa', xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=0)
-   image(x[seq(1, 3360, 1)], y[seq(1, 3360, 1)], z[seq(1, 3360, 1), seq(1, 3360, 1)], 
-      xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=cols, axes=T, xlab="", ylab="", add=T)
+    p <- cbind(c(-83, -70, -70, -81.5, -81.5, -83), c(23, 23, 40, 40, 24.58, 24.58))
+    
+    map('usa', xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=1)
+#   map('usa', xlim=c(-85, -80), ylim=c(23, 26), col=0)
+    ss <- 1
+    image(x[seq(1, 3360, ss)], y[seq(1, 3360, ss)], z[seq(1, 3360, ss), seq(1, 3360, ss)], 
+        xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=cols, axes=T, xlab="", ylab="", add=T)
     axis(1); axis(2, las = 2); box()
     
     k <- which(cod == (-4))
     ga <- rep(NA, length(k))
-    for (j in k) {
-      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
-      if (lon[1,j]-360 < (-81.7) & lo > (-81.7))  { ga[j] <- 1  }  }
+    lon2 <- lon[, k]
+    lat2 <- lat[, k]
+    last <- function(x) { x[!is.na(x)][length(x[!is.na(x)])] }
+    lo <- apply(lon2, 2, last) - 360
+    la <- apply(lat2, 2, last)
+    stg <- inout(cbind(lon2[1, ]-360, lat2[1, ]), p)
+    eng <- inout(cbind(lo, la), p)
     
-    n <- which(ga == 1)    
+    ga[abs(stg - 1) + eng*1 == 2] <- 1
+#    cat(c(model, "   "))
+#    cat(table(stg, eng))
+#    cat("\n")
+    
+   n <- which(ga == 1)    
     n1 <- n[seq(1, length(n), length.out = 1000)]
     for (j in n1) {
-      lines(lon[,j]-360, lat[,j], col="#FFFF0010")  } 
+      lines(lon2[, j]-360, lat2[, j], col="#FFFF0010")  } 
     for (j in n1) {
-      lo <- lon[!is.na(lon[,j]),j][length(lon[!is.na(lon[,j]),j])] - 360
-      la <- lat[!is.na(lat[,j]),j][length(lat[!is.na(lat[,j]),j])]
-        points(lon[1,j]-360, lat[1,j], col="#00FF0020", pch=19, cex=0.4)
+      lo <- lon2[!is.na(lon2[,j]),j][length(lon2[!is.na(lon2[,j]),j])] - 360
+      la <- lat2[!is.na(lat2[,j]),j][length(lat2[!is.na(lat2[,j]),j])]
+        points(lon2[1,j]-360, lat2[1,j], col="#00FF0020", pch=19, cex=0.4)
         points(lo, la, col="#FF000020", pch=19, cex=0.4)  }         
+    # polygon(p)
 
     text(-86, 35, model, font = 2, cex = 1.2, pos = 4)
     text(-86, 34, s1[s], font = 2, cex = 1.2, pos = 4)
     }
 }
+table(stg, eng)
+
 dev.off()
 

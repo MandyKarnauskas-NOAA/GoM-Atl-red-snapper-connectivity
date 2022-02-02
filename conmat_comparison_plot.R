@@ -11,7 +11,7 @@ png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_conm
 nf <- layout(matrix(c(11, 1:3, 11, 4:6, 11, 7:9, 0, rep(10, 3)), 4, 4, byrow=TRUE), c(2, rep(10, 3)), c(rep(10, 3), 2))
 layout.show(nf)
 
-for (m in 1: 3)  { 
+for (m in 1:3)  { 
   for (s in 1:3)  {
  
   model <- models[m]
@@ -30,13 +30,18 @@ for (m in 1: 3)  {
   bb <- 53:60
   ta <- 61:66
   sw <- 67:71
-  dt <- 72:76
-  sf <- 77:79
+  dt <- 72:75
+  sf <- 76:79    # note change to poly 76 for SA 
   ef <- 80:89
   ga <- 90:95
   sc <- 96:106
   nc <- 107:117
-  labs <- c("Panhandle", "Big Bend", "Central W FL", "SW FL", "Dry Tortugas", "S Florida", "E Florida", "GA", "SC", "NC")
+  labs <- c("Panhandle", "Big Bend", "Central W FL", "SW FL", "FL Keys Shelf", "S Florida", "E Florida", "GA", "SC", "NC")
+  
+  #####################  NEW   #######################
+  #  remov <- which(dat$ret_poly %in% sf)
+  #  dat <- dat[-remov, ]
+  ####################################################
   
   dat$rel <- NA
   dat$ret <- NA
@@ -82,6 +87,7 @@ for (i in 1:length(pollis))     {
 settle <- t(settle)
 nn <- 300
 cl = viridis(nn, end = 0.85)[nn:1]
+cl[1] <- gray(0.85)
 image(pollis, pollis[1:9], (settle[, 1:9]), col=cl, breaks = c(0, seq(1, 20000, length.out = nn-1), 40000), 
       axes=F,  xlab="", ylab="")
 
@@ -97,6 +103,8 @@ box()
 #abline(0,1, lty=2)
 abline(v = 5.5, lty=1, col = 0)
 abline(h = 5.5, lty=1, col = 0)
+
+box()
 
 txt <- round(settle / sum(sum(settle)) * 100, 1)
 for (i in 1:10) {
@@ -115,4 +123,6 @@ plot.new()
 mtext(side=2, line= (-2), "               Source Node", font=2)
 
 dev.off()
+
+
 

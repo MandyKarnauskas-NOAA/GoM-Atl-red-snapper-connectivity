@@ -3,25 +3,31 @@ rm(list=ls())
 
 setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/final_for_subsample")
 
+# set directory ---------------
+
 foldersel <- dir()
 write.table(c(), file = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/outputs2.txt", 
             quote = FALSE, append = F, col.names = F)
 
+# loop through folders to calculate GoM-Atl connectivity ---------------------
 
 for (i in 1:length(foldersel)) {
-
     filelist <- list.files(path = foldersel[i], pattern="con_file")     #   find files
     
-    for (j in 1:length(filelist))  {
-      
+  for (j in 1:length(filelist))  {
     dat <- read.table(paste0(foldersel[i], "/", filelist[j]))
-  
     colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
     
+    #####################  NEW   #######################
+#  sf <- 77:79
+#  remov <- which(dat$ret_poly %in% sf)
+#  dat <- dat[-remov, ]
+    ####################################################
+    
     dat$ret_reg <- "GOM"
-    dat$ret_reg[which(dat$ret_poly >= 77)] <- "ATL"
+    dat$ret_reg[which(dat$ret_poly >= 76)] <- "ATL"
     dat$rel_reg <- "GOM"
-    dat$rel_reg[which(dat$rel_poly >= 77)] <- "ATL"
+    dat$rel_reg[which(dat$rel_poly >= 76)] <- "ATL"
 
     tab <- table(dat$rel_reg, dat$ret_reg)
     num <- tab[2, 1] / (tab[1, 1] + tab[2, 1])   # of all recruits in Atlantic, what % came from Gulf
@@ -33,6 +39,8 @@ for (i in 1:length(foldersel)) {
     }
 }  
   
+# read in summary output calculated above and plot -------------------
+
 rm(list = ls())
 
 d <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/outputs2.txt", sep = " ")
@@ -40,6 +48,10 @@ d <- d[,2:4]
 names(d) <- c("fold", "year", "ga")
 d$model <- unlist(strsplit(as.character(d$fold), "_"))[seq(1, nrow(d)*2, 2)]
 d$spp   <- unlist(strsplit(as.character(d$fold), "_"))[seq(2, nrow(d)*2, 2)]
+
+d$spp[which(d$spp == "lane")] <- "OVM 1"
+d$spp[which(d$spp == "mutton")] <- "OVM 2"
+d$spp[which(d$spp == "grey")] <- "OVM 3"
 
 head(d)
 table(as.numeric(as.factor(d$model))+1, d$model)
@@ -50,18 +62,26 @@ plot(jitter(d$year), d$ga, col = as.numeric(as.factor(d$model))+1, pch = as.nume
 axis(2, las = 2); box()
 legend("topright", c(unique(d$model), unique(d$spp)), pch = c(19, 19, 19, 1:3), col = c(2:4, 1, 1, 1))
 
+d$model[which(d$model == "SABGOM")] <- " SABGOM"
 
-png(filename="summary_boxplot.png", units="in", width=3.5, height=3.5, pointsize=12, res=72*10)
+# barplot of summary results -----------------
 
-ggplot(d, aes(y = ga*100, fill = spp), axes = F) +
+library(ggplot2)
+
+png(filename="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/summary_boxplot.png", units="in", width=4.5, height=3.5, pointsize=12, res=72*10)
+
+ggplot(d, aes(y = ga*100, fill = spp), axes = F) + ylim(0, 35) + 
   geom_boxplot(width = 3) + facet_wrap(~model) +
-  scale_y_continuous(breaks = pretty(c(0, 35), n = 5)) +
+  #scale_y_continuous(breaks = pretty(c(0, 35), n = 5)) +
   scale_x_discrete(name="", breaks = 1, labels = "") + 
   ylab("% of Atlantic recruits spawned in Gulf") +
   scale_fill_discrete(name = "  vertical\nmigration\n behavior") +
-  theme(legend.position = c(0.85, 0.7))
+  theme(legend.position = 'right')
 
 dev.off()
+
+
+# other plots ----------
 
 tapply(d$ga, d$model, mean)
 tapply(d$ga, d$model, sd)
@@ -113,14 +133,14 @@ anova(lm(d$gg ~ d$model))
 
 
 
-# subsampling routine ----------------------
+# subsampling routine for calculating distributions based on biomass assumptions ----------------------
 
 rm(list=ls())
 
 setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/final_for_subsample")
 
-foldersel <- dir()
-numsel <- 1000
+foldersel <- dir()  # [grep("SABGOM", dir())]
+numsel <- 10000
 finres <- c(NA, NA, NA, NA)
 par(mfrow = c(5, 2), mar = c(3, 3, 0, 0))
 
@@ -139,10 +159,16 @@ for (i in 1:numsel) {
   dat <- read.table(paste0(foldersel[x1], "/", filelist[x2]))
   colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_dep","rel_yr","rel_mo","rel_d")
 
+  #####################  NEW   #######################
+   sf <- 76:79
+   remov <- which(dat$ret_poly %in% sf)
+   dat <- dat[-remov, ]
+  ####################################################
+  
   dat$ret_reg <- "GOM"
-  dat$ret_reg[which(dat$ret_poly >= 77)] <- "ATL"
+  dat$ret_reg[which(dat$ret_poly >= 76)] <- "ATL"
   dat$rel_reg <- "GOM"
-  dat$rel_reg[which(dat$rel_poly >= 77)] <- "ATL"
+  dat$rel_reg[which(dat$rel_poly >= 76)] <- "ATL"
   
   gomdat <- dat[which(dat$rel_reg == "GOM"),]
   atldat <- dat[which(dat$rel_reg == "ATL"),]
@@ -150,7 +176,8 @@ for (i in 1:numsel) {
   biomfact <- b
   
   samp <- sample(1:nrow(gomdat), nrow(gomdat) * biomfact, replace = TRUE)
-  length(samp)/nrow(gomdat)   # check
+#  cat(length(samp)/nrow(gomdat))   # check
+#  cat("\n")
   gomdat2 <- gomdat[samp,]
   dat2 <- rbind(atldat, gomdat2)
   
@@ -164,6 +191,8 @@ for (i in 1:numsel) {
   finres <- rbind(finres, res)
 }
 
+finres
+
 #mean(num)
 #max(num)
 #min(num)
@@ -171,10 +200,6 @@ for (i in 1:numsel) {
 #tapply(num, mod, mean)
 
 finres
-
-
-
-
 
 
 
@@ -199,8 +224,8 @@ map('state', add=T)
 text(tapply(d$lon, d$pol, mean), tapply(d$lat, d$pol, mean), unique(d$pol), cex=0.5)
 
 are[1:41] <- "W GoM"
-are[42:76] <- "E GoM"
-are[77:89] <- "E FL"
+are[42:75] <- "E GoM"
+are[76:89] <- "E FL"
 are[90:95] <- "GA"
 are[96:106] <- "SC"
 are[107:117] <- "NC"
@@ -242,3 +267,29 @@ dat$state[which(dat$ret_poly>=min(nc))] <- "NC"
 
 
 ##################################################################################
+
+# Gulf SSB vs Atlantic NAA plot
+
+d <- read.table("RS_S73_NAA.csv", header = T, sep = ",")
+
+d <- d[which(d$year >=1978), ]
+dim(d)
+
+cols <- rainbow(20, end = 0.8)
+cols[1] <- "darkgray"
+dim(t(d[, 2:21]))
+
+par(mar = c(4, 5, 1, 6))
+b <- barplot(as.matrix(t(d[, 2:21])), space = 0, col = cols, names.arg = d$year, las = 2, axes = F, 
+             legend = c(1:20), args.legend = list(x = 20, y = 2500000, ncol = 2, bty = "n"), border = NA)
+axis(4, las = 2, at = seq(0, 2500000, 500000), lab = seq(0, 2500000, 500000)*10^5*1000/10^6)
+axis(2, las = 2, at = seq(0, 2500000, 500000), lab = seq(0, 2500000, 500000)/10^6)
+lines(b, d$Gulf_SSB/10^5, lwd = 3)
+abline(h=0)
+points(b, d$Gulf_SSB/10^5, pch = 20, cex = 1.5)
+mtext(side = 2, line = 2.5, "South Atlantic numbers at age (millions of fish)")
+mtext(side = 4, line = 4.5, "Eastern Gulf spawning output (millions of eggs)")
+
+
+ccf(d$X1[1:39], d$Gulf_SSB[1:39])
+

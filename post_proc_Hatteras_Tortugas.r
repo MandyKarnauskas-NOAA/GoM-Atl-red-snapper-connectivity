@@ -27,6 +27,7 @@ colnames(dat) <- c("rel_poly","ret_poly","ret_yr","ret_mo","ret_d","age","ret_de
 
 nrow(dat) / sum(d$V5) * 100     #  Mercator - 2.3% of particles returned
                                 #  HYCOM - 14.1% of particles returned
+                                #  SABGOM - 9.1%
 head(dat)
 table(dat$rel_poly)
 table(dat$ret_poly)
@@ -93,8 +94,9 @@ axis(1, at=1:31, lab=rep("", 31), tck= -0.01)
 # plot all larval fates --------------------
 par(mfrow=c(2,2), mex=0.5)
 nn <- c("settled", "close to land", "left area", "can still move"); m <- 1   
+
 for (k in c(-4, -2, -1, 0))  { 
-map('usa', ylim=c(31, 38.5), xlim=c(-82,-72.8), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
+map('state', ylim=c(31, 38.5), xlim=c(-82,-72.8), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
 # image(x,y,z, col=rainbow(100, start=0.5, end=0.6)[100:1], add=T); box()
 mtext(side=3, line=1, nn[m]); m <- m+1
 mm <- which(cod == (k))
@@ -110,21 +112,32 @@ for (j in i) {  points(lon[max(which(!is.na(lon[,j]))),j]-360,
 # close-up of settled larvae -------------------
 dev.off()
 co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
-map('usa', ylim=c(32, 36), xlim=c(-80,-74), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
+map('state', ylim=c(32, 36), xlim=c(-80,-74), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
 for (i in 1:117)  {
   f <- co[which(co$V3==i),]
   polygon(f, border=1) 
   text(mean(f$V1), mean(f$V2), i, cex = 0.5)}                  
 
 k <- which(cod == (-4))
-i <- k[seq(1, length(k), length.out = 500)]
+i <- k[seq(1, length(k), length.out = 200)]
 mtext(side=3, line=1, paste0(model, " - successfully settled"), cex=1.2)
   for (j in i) {  lines(lon[,j]-360, lat[,j], col="#00000010")   
                   points(lon[1,i]-360, lat[1,i], col="#00FF0001", pch=19, cex=0.65)   
                   points(lon[max(which(!is.na(lon[,j]))),j]-360, 
-                         lat[max(which(!is.na(lat[,j]))),j], col="#FF000030", pch=19, cex=0.75)   }  
+                         lat[max(which(!is.na(lat[,j]))),j], col="#FF000030", pch=19, cex=0.75)   }
   legend("topleft", c("start", "end"), pch=19, cex=1, col=c(3,2))
 
+k <- which(cod == (-4))
+endpts <- rep(NA, length(k))
+i <- 1
+  for (j in k) {   endpts[i] <- lat[max(which(!is.na(lat[,j]))),j] 
+                    i <- i + 1} 
+min(endpts)                             # SABGOM: 33.96841   Mercator: 33.57697  HYCOM: 33.33318
+abline(h = min(endpts), col = 2)
+
+hist(endpts)
+table(endpts < 33.9) / length(endpts)
+  
 table(dat$rel_poly)  
 table(dat$ret_poly)
 
@@ -134,14 +147,45 @@ min(lat, na.rm = T)
 length(which(cod == -4)) / length(cod) * 100  # should match number above
 
 
+# final plot -------------------
+
+folder <- "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/"  # folder for final plots
+load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_CODES/bathy_Hatteras.RData")        # stored GEBCO data and color scheme
+
+png(filename = paste0(folder, "Hatteras_ROMS", model, ".png"), units="in", width=5, height=6, pointsize=12, res=72*20)
+
+map('usa', ylim=c(32.5, 36.9), xlim=c(-77.9,-73.1), xlab="", ylab="", col=0); box(); axis(1); axis(2, las=2)
+image(x, y, -log(-z), col= cols, add=T); box()
+mtext(side=3, line=1, "ROMS", cex=1.2)
+
+k <- which(cod == (-1) | cod == (0))
+i <- k[seq(1, length(k), length.out = 300)] 
+for (j in i) {  points(lon[1,i]-360, lat[1,i], col="#00FF0002", pch=19, cex=0.65) }
+  for (j in i) {    lines(lon[,j]-360, lat[,j], col="#00000015")  }
+
+k <- which(cod == (-4))
+i <- k[seq(1, length(k), length.out = 300)]
+for (j in i) {  lines(lon[,j]-360, lat[,j], col="#FFFF0015")  } 
+#  points(lon[1,i]-360, lat[1,i], col="#00FF0002", pch=19, cex=0.65)   
+for (j in i) {  points(lon[max(which(!is.na(lon[,j]))),j]-360, 
+         lat[max(which(!is.na(lat[,j]))),j], col="#FF000040", pch=19, cex=0.85)   }
+
+legend("bottomright", c("release locations", "settlement locations", "all trajectories", "trajectories of settled larvae"), 
+       pch = c(19, 19, NA, NA), lwd = c(NA, NA, 2, 2), col = c(3, 2, 1, 7))
+
+dev.off()
+
+
 
 
 
 ################# old code #####################
 
-  map('usa', ylim=c(32.5, 38.5), xlim=c(-78,-72.8), xlab="", ylab="", col=0); box(); axis(1); axis(2, las=2)
-#map('usa', ylim=c(32.5, 38.5), xlim=c(-78,-72.2), xlab="", ylab="", col=0); box(); axis(1); axis(2, las=2)
-image(x,y,z, col=rainbow(100, start=0.5, end=0.6)[100:1], add=T); box()
+
+load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_CODES/bathy_Hatteras.RData")        # stored GEBCO data and color scheme
+
+map('usa', ylim=c(32.5, 38), xlim=c(-78,-72.8), xlab="", ylab="", col=0); box(); axis(1); axis(2, las=2)
+image(x, y, -log(-z), col= cols, add=T); box()
 mtext(side=3, line=2.2, "can still move", cex=1.2)
 mtext(side=3, line=1.0, "HYCOM 1/50 deg - 2008", cex=1.2)
 i <- which(cod == 0)

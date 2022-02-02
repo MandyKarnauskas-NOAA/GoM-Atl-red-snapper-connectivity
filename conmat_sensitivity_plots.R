@@ -37,8 +37,8 @@ for (m in 1: 3)  {
   d <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
   names(d) <- c("lon", "lat", "pol")
   pols <- unique(d$pol)
-  tklocs <- c(89.5, 76.5, 95.5, 117.5, 106.5, 41.5) 
-  lablocs <- c(21.0, 59.0, 83.0, 92.5, 101.0, 112.0) 
+  tklocs <- c(89.5, 75.5, 95.5, 117.5, 106.5, 41.5)   # changed from 76.5 to 75.5
+  lablocs <- c(21.0, 58.5, 82.5, 92.5, 101.0, 112.0)  # changed from 59 to 58.5
 
   con <- dat
   colnames(con) <- c("source","sink","yr","mon","day","tim","ret_dep","rel_yr","rel_mo","rel_d")
@@ -63,10 +63,10 @@ for (k in unique(con$yr))  {
   
   axis(1, at=tklocs, lab=rep("", 6))
   axis(2, at=tklocs, lab=rep("", 6))
-  axis(2, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
-  axis(1, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2)
-  box(); abline(0,1, lty=2)/
-  abline(v=tklocs[2], lty=1); abline(h=tklocs[2], lty=1)
+  axis(2, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2, line = -0.2)
+  axis(1, at=lablocs, lab=c("W GOM", "E GOM", "E FL", "GA", "SC", "NC"), tick=F, cex=1, las=2, line = -0.2)
+  box(); abline(0, 1, lty=2)
+  abline(v = tklocs[2], lty=1); abline(h = tklocs[2], lty=1)
 }
 
 if (length(unique(con$yr)) <= 4)  { plot.new() }
