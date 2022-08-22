@@ -3,6 +3,7 @@ rm(list=ls())
 
 setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/FINALRUNS_DEC2020/final_for_subsample")
 
+
 # set directory ---------------
 
 foldersel <- dir()
@@ -68,9 +69,9 @@ d$model[which(d$model == "SABGOM")] <- " SABGOM"
 
 library(ggplot2)
 
-png(filename="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/summary_boxplot.png", units="in", width=4.5, height=3.5, pointsize=12, res=72*10)
+png(filename="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/summary_boxplot2.png", units="in", width=4.5, height=3.5, pointsize=12, res=72*10)
 
-ggplot(d, aes(y = ga*100, fill = spp), axes = F) + ylim(0, 35) + 
+ggplot(d, aes(y = ga*100, fill = year), axes = F) + ylim(0, 35) + 
   geom_boxplot(width = 3) + facet_wrap(~model) +
   #scale_y_continuous(breaks = pretty(c(0, 35), n = 5)) +
   scale_x_discrete(name="", breaks = 1, labels = "") + 
@@ -86,6 +87,19 @@ dev.off()
 tapply(d$ga, d$model, mean)
 tapply(d$ga, d$model, sd)
 tapply(d$ga, d$model, sd) / tapply(d$ga, d$model, mean)
+
+#SABGOM     HYCOM  Mercator 
+#0.2734216 0.4033875 0.5891569 
+#0.2636748 0.4746301 0.6493526 
+
+tab <- tapply(d$ga, list(d$spp, d$model), mean)
+apply(tab, 2, mean)
+apply(tab, 2, sd)
+apply(tab, 2, sd) / apply(tab, 2, mean)
+
+#SABGOM      HYCOM   Mercator 
+#0.05441065 0.14830738 0.07045451 
+#0.06142489 0.12241253 0.13884702 
 
 d$model <- as.factor(d$model)
 d$spp <- as.factor(d$spp)

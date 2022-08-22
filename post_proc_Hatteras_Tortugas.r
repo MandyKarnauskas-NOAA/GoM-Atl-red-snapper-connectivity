@@ -112,6 +112,7 @@ for (j in i) {  points(lon[max(which(!is.na(lon[,j]))),j]-360,
 # close-up of settled larvae -------------------
 dev.off()
 co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", sep="\t")
+
 map('state', ylim=c(32, 36), xlim=c(-80,-74), xlab="", ylab="", col=1); box(); axis(1); axis(2, las=2)
 for (i in 1:117)  {
   f <- co[which(co$V3==i),]
@@ -152,7 +153,10 @@ length(which(cod == -4)) / length(cod) * 100  # should match number above
 folder <- "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/"  # folder for final plots
 load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_CODES/bathy_Hatteras.RData")        # stored GEBCO data and color scheme
 
-png(filename = paste0(folder, "Hatteras_ROMS", model, ".png"), units="in", width=5, height=6, pointsize=12, res=72*20)
+cols <- colorRampPalette(brewer.pal(9, 'Blues'))(180)[110:1]
+cols[100] <- "white"
+
+#png(filename = paste0(folder, "Hatteras_", model, ".png"), units="in", width=5, height=6, pointsize=12, res=72*20)
 
 map('usa', ylim=c(32.5, 36.9), xlim=c(-77.9,-73.1), xlab="", ylab="", col=0); box(); axis(1); axis(2, las=2)
 image(x, y, -log(-z), col= cols, add=T); box()
@@ -160,7 +164,7 @@ mtext(side=3, line=1, "ROMS", cex=1.2)
 
 k <- which(cod == (-1) | cod == (0))
 i <- k[seq(1, length(k), length.out = 300)] 
-for (j in i) {  points(lon[1,i]-360, lat[1,i], col="#00FF0002", pch=19, cex=0.65) }
+for (j in i) {  points(lon[1,i]-360, lat[1,i], col="#00b30020", pch=19, cex=0.85) }
   for (j in i) {    lines(lon[,j]-360, lat[,j], col="#00000015")  }
 
 k <- which(cod == (-4))
@@ -170,8 +174,8 @@ for (j in i) {  lines(lon[,j]-360, lat[,j], col="#FFFF0015")  }
 for (j in i) {  points(lon[max(which(!is.na(lon[,j]))),j]-360, 
          lat[max(which(!is.na(lat[,j]))),j], col="#FF000040", pch=19, cex=0.85)   }
 
-legend("bottomright", c("release locations", "settlement locations", "all trajectories", "trajectories of settled larvae"), 
-       pch = c(19, 19, NA, NA), lwd = c(NA, NA, 2, 2), col = c(3, 2, 1, 7))
+#legend("bottomright", c("release locations", "settlement locations", "all trajectories", "trajectories of settled larvae"), 
+ #      pch = c(19, 19, NA, NA), lwd = c(NA, NA, 2, 2), col = c(3, 2, 1, 7))
 
 dev.off()
 

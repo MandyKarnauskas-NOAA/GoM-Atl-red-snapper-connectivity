@@ -6,7 +6,7 @@ models <- c("SABGOM", "HYCOM", "Mercator")
 spps   <- c("lane", "mutton", "grey")
 s1 <- c("OVM 1", "OVM 2", "OVM 3")
 
-png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_conmat.png", units="in", width=8.6, height=8, pointsize=12, res=72*20)
+png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_conmat.png", units="in", width=8.6, height=8, pointsize=12, res=72*200)
 
 nf <- layout(matrix(c(11, 1:3, 11, 4:6, 11, 7:9, 0, rep(10, 3)), 4, 4, byrow=TRUE), c(2, rep(10, 3)), c(rep(10, 3), 2))
 layout.show(nf)

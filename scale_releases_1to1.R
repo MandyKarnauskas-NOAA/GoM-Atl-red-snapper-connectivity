@@ -62,9 +62,11 @@ arearat
 (sum(GOM$V5)) / (sum(ATL$V5))
 
 # plot results to check --------------------------------
-par(mfrow=c(1,2))
+#par(mfrow=c(1,2))
 
-par(mar = c(5, 5, 1, 1))
+dev.off()
+
+par(mar = c(5, 7, 1, 1))
 sc2 <- scaled[which(scaled$V6==2013 & scaled$V7==6 & scaled$V8==27),]
 x <- sc2$V5 / 130
 pos <- c(0.005,  0.05, 0.1, 0.2, 0.5, 1, 2, 4, 5, 10, 20, 50, 100, 1000)
@@ -73,10 +75,10 @@ b <- max((x)-a)*1.03
 pind <- round((x-a)/b*100+1); print(min(pind)); print(max(pind))
 cols <- c(rainbow(30, start=0.82, end=0.99), rainbow(70, start=0.01, end=0.17))[100:1]
 map('state', fill = 1, interior=F, col = gray(0.85), ylim=c(22.5, 35), xlim=c(-88,-76))
-mtext(side = 1, line = 2.5, "longitude")
-mtext(side = 2, line = 2.5, "latitude")
+#mtext(side = 1, line = 2.5, "longitude")
+#mtext(side = 2, line = 2.5, "latitude")
 points(sc2$V2, sc2$V3, col=cols[pind], pch=15, cex=0.5)
-box(); axis(1); axis(2, las = 2)
+#box(); axis(1); axis(2, las = 2)
 xloc <- seq(-86, -78, length.out=100)
 for (j in 1:100) {   polygon(c(xloc[j], xloc[j+1],xloc[j+1], xloc[j]), c(23.0,23.0,23.4,23.4), col=cols[j], border=NA) }
 w <- which.min(abs(((max(x)-min(x))/6) - pos))
@@ -84,7 +86,15 @@ if(-pos[w]<min(x)) { xx <- seq(0, max(x), pos[w]); xx <- xx[xx>min(x)] } else { 
 text(xloc[round((xx-a)/b*100+1)], y=22.75, xx, pos=2)
 text(-82, 24.25, "relative index of spawning output", pos = 1)
 
-mtext(side=3, line=1.5, "scaled fecundity map", cex=1.3, font=2)
+degs = seq(88, 76, -2)
+a = sapply(degs, function(x) bquote(.(x)*degree ~ W))
+axis(1, at = -degs, lab=do.call(expression, a))
+degs = seq(24, 34, 2)
+a = sapply(degs, function(x) bquote(.(x)*degree ~ N))
+axis(2, at = degs, lab=do.call(expression, a), las = 2)
+box()
+
+#mtext(side=3, line=1.5, "scaled fecundity map", cex=1.3, font=2)
 
 
 sc3 <- unscaled[which(unscaled$V6==2013 & unscaled$V7==6 & unscaled$V8==27),]

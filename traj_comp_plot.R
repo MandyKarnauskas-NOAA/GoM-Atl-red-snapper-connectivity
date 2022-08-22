@@ -3,14 +3,15 @@ rm(list = ls())
 library(ncdf4)
 library(splancs)
 library(maps)
+library(RColorBrewer)
 
 models <- c("SABGOM", "HYCOM", "Mercator")
 spps   <- c("lane", "mutton", "grey")
 s1 <- c("OVM 1", "OVM 2", "OVM 3")
 
-png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_traj_poly76.png", units="in", width=5.9, height=7.5, pointsize=12, res=72*20)
+png(filename = "C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/plots/comp_traj_newbath1.png", units="in", width=5.9, height=7.5, pointsize=12, res=72*20)
 
-par(mfrow = c(3, 3), mar = c(2, 2, 0, 0), xpd = F, mex = 0.8)
+par(mfrow = c(3, 3), mar = c(2, 4, 0, 0), xpd = F, mex = 0.9)
 
 for (m in 1: 3)  { 
   for (s in 1:3)  {
@@ -49,6 +50,8 @@ for (m in 1: 3)  {
     }
     
     load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/GEBCO_bathy_hires.RData")        # stored GEBCO data and color scheme
+    cols <- colorRampPalette(brewer.pal(9, 'Blues'))(150)[110:11]
+    cols[100] <- "white"
     
     p <- cbind(c(-83, -70, -70, -81.5, -81.5, -83), c(23, 23, 40, 40, 24.58, 24.58))
     
@@ -56,8 +59,16 @@ for (m in 1: 3)  {
 #   map('usa', xlim=c(-85, -80), ylim=c(23, 26), col=0)
     ss <- 1
     image(x[seq(1, 3360, ss)], y[seq(1, 3360, ss)], z[seq(1, 3360, ss), seq(1, 3360, ss)], 
-        xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=cols, axes=T, xlab="", ylab="", add=T)
-    axis(1); axis(2, las = 2); box()
+      xlim=c(-86.25, -75.25), ylim=c(23, 35.75), col=cols, axes=T, xlab="", ylab="", add=T)
+    
+    degs = seq(86, 78, -4)
+    a = sapply(degs, function(x) bquote(.(x)*degree ~ W))
+    axis(1, at = -degs, lab=do.call(expression, a))
+    degs = seq(24, 32, 4)
+    a = sapply(degs, function(x) bquote(.(x)*degree ~ N))
+    axis(2, at = degs, lab=do.call(expression, a))
+    box()
+      #    axis(1); axis(2, las = 2); box()
     
     k <- which(cod == (-4))
     ga <- rep(NA, length(k))
@@ -81,7 +92,7 @@ for (m in 1: 3)  {
     for (j in n1) {
       lo <- lon2[!is.na(lon2[,j]),j][length(lon2[!is.na(lon2[,j]),j])] - 360
       la <- lat2[!is.na(lat2[,j]),j][length(lat2[!is.na(lat2[,j]),j])]
-        points(lon2[1,j]-360, lat2[1,j], col="#00FF0020", pch=19, cex=0.4)
+        points(lon2[1,j]-360, lat2[1,j], col="#00b30020", pch=19, cex=0.4)
         points(lo, la, col="#FF000020", pch=19, cex=0.4)  }         
     # polygon(p)
 
