@@ -50,7 +50,7 @@ lnorm.se   <- function(x1, x1e) {  ((exp(x1e^2)-1)*exp(2 * x1 + x1e^2))^0.5  }
    
 preddoy <- data.frame()
 
-for (i in seq(min(d$doy), max(d$doy), 6))  {      
+for (i in seq(min(d$doy)-1, max(d$doy), 6))  {      
         samp$doy <- i
         samp$lunar <- mean(d$lunar)                                             # use average lunar phase
         samp$year  <- 2014                                                      # use most recent year
@@ -102,9 +102,11 @@ dat <- dat[dat$doy %in% names(which(tab>cutoff)),]
 dim(dat)
 plot(dat$doy, dat$N)     # check cutoff
 
+dev.off()
+
 # assign polygon labels -----------------------------------------
 
-co <- read.table("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
+co <- read.table("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/CMS_input_files/redSnapperSett_GOM_ATL_hires.xyz", header=F)
 
 #  plot original recruitment habitat grid cells 
 map("usa", xlim=c(-100,-75), ylim=c(24,36))
@@ -194,19 +196,19 @@ rel$mon <- as.numeric(format(strptime(rel$doy, format="%j"), format="%m"))
 rel$day <- as.numeric(format(strptime(rel$doy, format="%j"), format="%d")) 
 head(rel)                                                                    # first day is May 22
 
-lis <- 2013               # loop over years in matrix below  2008-2009 for 1/12 deg HYCOM; 2004-2010 for SABGOM
+lis <- 2020               # loop over years in matrix below  2008-2009 for 1/12 deg HYCOM; 2004-2010 for SABGOM
 
 ##############  trim release file to cells with sufficient eggs   ##############
 
 m <- rel[-c(5,6)]       # 'm' is list of release sites with columns: polygon, lon, lat, number of releases
 head(m)
 
-x <- m$N / 100
+x <- m$N / 1000
 x1 <- round(x)
 tapply(x, (x1 == 0), sum)/sum(x)          # what percentage of particles get lost by rounding?
 mean(x1); min(x1); max(x1)
 
-m$N <-round(m$N / 100)
+m$N <-round(m$N / 1000)
 mean(m$N); min(m$N); max(m$N)
 table(m$N==0)
 
@@ -240,13 +242,16 @@ mean(mat$V5); min(mat$V5); max(mat$V5)                                  # distri
 #  break down by year, then above and below 34N
 #  >34N run thru global HYCOM
 #  <34N run thru SABGOM
+
+write.table(mat, file="C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/RS_ATL_release.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+save(mat, file = "C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/ATLreleaseForScaling_all.RData")
   
 matN <- mat[which(mat$V3 > 33.4),]
 matS <- mat[which(mat$V3 <= 33.4),]
 
 ################    double check that matrix came out ok     ###################
 
-matfin <- matS
+matfin <- mat
 table(matfin$V6, matfin$V7)       
 table(matfin$V6)
 matplot(table(matfin$V7, matfin$V6), type="l")
@@ -255,17 +260,17 @@ diff(table(matfin$V6))
 tapply(matfin$V5, list(matfin$V6, matfin$V7), sum)
 matplot(tapply(matfin$V5, list(matfin$V7, matfin$V6), sum), type="l")
 
-f <- which(matfin$V6==2013 & matfin$V7 == 5 & matfin$V8 == 23); length(f)       # off peak spawning 
-ff <- round(matfin$V5[f]/100)
+f <- which(matfin$V6==2020 & matfin$V7 == 5 & matfin$V8 == 22); length(f)       # off peak spawning 
+ff <- round(matfin$V5[f])
 ff[ff == 0] <- 10000
 plotSAmap(ff, matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
-f <- which(matfin$V6==2013 & matfin$V7 == 6 & matfin$V8 == 21); length(f)      # peak spawning
+f <- which(matfin$V6==2020 & matfin$V7 == 6 & matfin$V8 == 27); length(f)      # peak spawning
 plotSAmap(matfin$V5[f], matfin$V2[f], matfin$V3[f], cexnum=0.6, pchnum=15)
 
 #save(matS, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")          # WRITE FILE TO TXT
 
-#write.table(mat, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_release_HYCOM150.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
+#write.table(mat, file="C:/Users/mandy.karnauskas/Desktop/RS_ATL_release.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 #write.table(matN, file="C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseHatteras.txt", sep="\t", col.names=F, row.names=F)          # WRITE FILE TO TXT
 #write.table(matS, file="C:/Users/mkarnauskas/Desktop/RS_FATEproject/MASTER_codes/RS_ATL_releaseMain_HYCOM150.txt", sep="\t", col.names=F, row.names=F)  
 
@@ -326,6 +331,6 @@ table(d3$V4)
 d3$V4[which(d3$V4 == 50)] <- 40
 table(d3$V4)
 
-write.table(d3, file="Hatteras_2017MayJun.txt", sep="\t", col.names=F, row.names=F)
+#write.table(d3, file="Hatteras_2017MayJun.txt", sep="\t", col.names=F, row.names=F)
 
 

@@ -11,21 +11,33 @@ rm(list=ls())
 if (!"maps" %in% installed.packages()) install.packages("maps", repos='http://cran.us.r-project.org')
 library(maps)
 
-source("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/findMinDepth.R")
+source("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/findMinDepth.R")
 
 ### Step 1: import independent maps and scale them to known ratios calculated above
 
 # load data ----------------------------------------------------------
 
-load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/GOMreleaseForScaling.RData")
+load("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/GOMreleaseForScaling.RData")
 GOM <- matfinGOM
-load("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")
-ATL <- matS
+GOM$V6 <- 2020
+load("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/ATLreleaseForScaling_all.RData")
+ATL <- mat    # entire domain up to Hatteras
+#load("C:/Users/mandy.karnauskas/Desktop/completed_manuscripts/RS_FATEproject/MASTER_codes/ATLreleaseForScaling.RData")
+#ATL <- matS  # only South of 33.4 degrees north
+
+head(GOM)
+head(ATL)
+
+table(GOM$V7, GOM$V8)
+table(ATL$V7, ATL$V8)
+
+unique(paste0(GOM$V7, GOM$V8)) %in% unique(paste0(ATL$V7, ATL$V8))
+unique(paste0(ATL$V7, ATL$V8)) %in% unique(paste0(GOM$V7, GOM$V8)) 
 
 # check how many millions of particles present in each file ----------
 
-sum(GOM$V5)/10^5
-sum(ATL$V5)/10^5
+sum(GOM$V5)/10^6
+sum(ATL$V5)/10^6
 
 areaGOM <- length(unique(paste(GOM$V2, GOM$V3)))
 areaATL <- length(unique(paste(ATL$V2, ATL$V3)))  
@@ -67,17 +79,17 @@ arearat
 dev.off()
 
 par(mar = c(5, 7, 1, 1))
-sc2 <- scaled[which(scaled$V6==2013 & scaled$V7==6 & scaled$V8==27),]
+sc2 <- scaled[which(scaled$V6==2020 & scaled$V7==6 & scaled$V8==27),]
 x <- sc2$V5 / 130
 pos <- c(0.005,  0.05, 0.1, 0.2, 0.5, 1, 2, 4, 5, 10, 20, 50, 100, 1000)
 a <- floor(min(x))
 b <- max((x)-a)*1.03
 pind <- round((x-a)/b*100+1); print(min(pind)); print(max(pind))
 cols <- c(rainbow(30, start=0.82, end=0.99), rainbow(70, start=0.01, end=0.17))[100:1]
-map('state', fill = 1, interior=F, col = gray(0.85), ylim=c(22.5, 35), xlim=c(-88,-76))
+map('state', fill = 1, interior=F, col = gray(0.85), ylim=c(22.5, 35.5), xlim=c(-88,-75.1))
 #mtext(side = 1, line = 2.5, "longitude")
 #mtext(side = 2, line = 2.5, "latitude")
-points(sc2$V2, sc2$V3, col=cols[pind], pch=15, cex=0.5)
+points(sc2$V2, sc2$V3, col=cols[pind], pch=15, cex=0.7)
 #box(); axis(1); axis(2, las = 2)
 xloc <- seq(-86, -78, length.out=100)
 for (j in 1:100) {   polygon(c(xloc[j], xloc[j+1],xloc[j+1], xloc[j]), c(23.0,23.0,23.4,23.4), col=cols[j], border=NA) }
@@ -93,11 +105,10 @@ degs = seq(24, 34, 2)
 a = sapply(degs, function(x) bquote(.(x)*degree ~ N))
 axis(2, at = degs, lab=do.call(expression, a), las = 2)
 box()
+mtext(side=3, line=1, "scaled fecundity map", cex=1.3, font=2)
 
-#mtext(side=3, line=1.5, "scaled fecundity map", cex=1.3, font=2)
 
-
-sc3 <- unscaled[which(unscaled$V6==2013 & unscaled$V7==6 & unscaled$V8==27),]
+sc3 <- unscaled[which(unscaled$V6==2020 & unscaled$V7==6 & unscaled$V8==27),]
 x <- sc3$V5 / 100
 pos <- c(0.005,  0.05, 0.1, 0.2, 0.5, 1, 2, 4, 5, 10, 20, 50, 100, 1000)
 a <- floor(min(x))
@@ -119,7 +130,7 @@ mtext(side=3, line=1.5, "unscaled fecundity map", cex=1.3, font=2)
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 dim(scaled)
 
-scaled$V5 <- round(scaled$V5/1000)  # 200 for large, 1000 for small
+scaled$V5 <- round(scaled$V5/200)  # 200 for large, 1000 for small
 
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 table(scaled$V5==0)
@@ -129,7 +140,7 @@ dim(scaled)
 min(scaled$V5); max(scaled$V5); mean(scaled$V5); sum(scaled$V5)
 
 # check particle reduction -------------------------------------
-sc2 <- scaled[which(scaled$V6==2013 & scaled$V7==7 & scaled$V8==27),]
+sc2 <- scaled[which(scaled$V6==2020 & scaled$V7==6 & scaled$V8==27),]
 x <- sc2$V5
 pos <- c(0.005,  0.05, 0.1, 0.2, 0.5, 1, 2, 4, 5, 20, 50, 100, 200, 500, 1000)
 a <- floor(min(x))
@@ -144,12 +155,16 @@ for (j in 1:100) {   polygon(c(xloc[j], xloc[j+1],xloc[j+1], xloc[j]), c(23.5,23
 w <- which.min(abs(((max(x)-min(x))/6) - pos))
 if(-pos[w]<min(x)) { xx <- seq(0, max(x), pos[w]); xx <- xx[xx>min(x)] } else {  xx <- c(seq(-pos[w], min(x), -pos[w]), seq(0, max(x), pos[w])) }
 text(xloc[round((xx-a)/b*100+1)], y=23.2, xx, pos=2)
-mtext(side=3, line=1.5, "scaled fecundity map", cex=1.3, font=2)
+mtext(side=3, line=1.0, "scaled fecundity map", cex=1.3, font=2)
 
 #scaledfin <- scaled
 dim(scaled)
 
-setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes")
+#setwd("C:/Users/mandy.karnauskas/Desktop/RS_FATEproject/MASTER_codes")
+
+write.table(scaled, file="scaled1to1GOMATLrel_wHatteras.txt", sep="\t", col.names=F, row.names=F)
+
+
 
 d <- read.table("bad.csv", sep = ",", header = F)
 d$V4 <- d$V3
@@ -224,6 +239,7 @@ abline(1,1)
 
 tapply(scaledfin$V5, scaledfin$V1 > 77, sum)
 ga <- tapply(scaledfin$V5, scaledfin$V1 > 77, sum)
+ga
 ga[1] / ga[2]   # 2.079171 for small; 2.10428 for large
 arearat
 sum(scaledfin$V5)   # 43404 per year for small; 224604 for large
